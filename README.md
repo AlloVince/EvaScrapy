@@ -10,6 +10,13 @@ EvaScrapy 是一个基于Scrapy的数据抓取项目， 在Scrapy的基础上扩
 
 EvaScrapy 仅支持抓取原始数据， 数据的ETL通过其他项目完成
 
+## 使用
+
+```shell
+wget https://github.com/AlloVince/EvaScrapy/archive/master.tar.gz -O master.tar.gz && tar xvf master.tar.gz --strip 1 --keep-old-files && rm master.tar.gz
+```
+
+
 ## 环境安装
 
 安装 pyenv
@@ -167,3 +174,10 @@ TO BE DONE
 Refers:
 
 - https://www.biaodianfu.com/scrapy-redis.html
+
+
+## Docker
+
+```
+docker run -e "APP_TASK=full" -e "APP_SPIDER=dmm" -e "REDIS_URL=docker.for.mac.host.localhost:6379" -v /opt/htdocs/crawler_appstores -it allovince/yinxing.crawler
+```

@@ -53,7 +53,9 @@ class ScheduleCrawlerRunner:
         return spider_class
 
     def schedule(self):
-        scheduler = TwistedScheduler()
+        scheduler = TwistedScheduler({
+            'apscheduler.timezone': self.settings.get('APP_TIMEZONE')
+        })
 
         # TODO: use random interval
         switch = {
@@ -91,7 +93,8 @@ class ScheduleCrawlerRunner:
                 self.crawler.settings.get('APP_CRAWL_INTERVAL'),
                 self.crawler.settings.get('APP_STORAGE_SHUFFLE_INTERVAL'))
             self.crawler.crawl(spider_class)
-            redis.set(spider_class.name + ':app_task', self.crawler.settings.get('APP_TASK'))
+            if os.getenv('APP_DISTRIBUTED'):
+                redis.set(spider_class.name + ':app_task', self.crawler.settings.get('APP_TASK'))
             self.round += 1
         else:
             logger.info(

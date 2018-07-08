@@ -95,7 +95,8 @@ DOWNLOADER_MIDDLEWARES = {
 
 
 # Scrapy-Redis Settings
-REDIS_URL = 'redis://localhost:6379'
+# REDIS_URL = 'redis://localhost:6379'
+REDIS_URL = 'redis://docker.for.mac.host.localhost:6379'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
