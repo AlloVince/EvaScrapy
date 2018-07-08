@@ -1,0 +1,9 @@
+Scrapy===1.5.0
+Scrapy-Redis==0.6.8
+scrapy-fake-useragent
+Redis===2.10.6
+python-dotenv===0.8.2
+oss2===2.4.0
+apscheduler===3.5.1
+pytz
+kafka-python
