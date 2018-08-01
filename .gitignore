@@ -59,3 +59,5 @@ docs/_build/
 
 .env
 .pytest_cache
+
+evascrapy/spiders/*_spider.py

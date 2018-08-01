@@ -70,7 +70,7 @@ class ScheduleCrawlerRunner:
         scheduler.start()
 
     def run_crawler(self):
-        redis = get_redis()
+        redis = get_redis(url=self.crawler.settings.get('REDIS_URL'))
         spider_class = self.get_spider_class(self.spider_name)
         if len(list(self.crawler.crawlers)) < 1:
             self.crawler.settings.set('APP_TASK',

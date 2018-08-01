@@ -1,0 +1,19 @@
+language: python
+node_js:
+- 3.6
+install:
+- pip install
+script:
+- pytest
+jobs:
+  include:
+    - stage: docker release
+      python: '3.6'
+      if: tag IS present
+      script:
+        - docker build -t allovince/evascrapy .
+        - docker tag allovince/evascrapy allovince/evascrapy:$TRAVIS_TAG
+        - docker images
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker push allovince/evascrapy:latest;
+        - docker push allovince/evascrapy:$TRAVIS_TAG;
