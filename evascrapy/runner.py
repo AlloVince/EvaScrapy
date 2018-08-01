@@ -80,7 +80,7 @@ class ScheduleCrawlerRunner:
             if os.getenv('APP_DISTRIBUTED'):
                 if redis.zcount(spider_class.name + ':requests', 0, 100) < 1:
                     for start_url in spider_class.start_urls:
-                        get_redis().sadd(spider_class.name + ':start_urls', start_url)
+                        redis.sadd(spider_class.name + ':start_urls', start_url)
                 else:
                     self.crawler.settings.set('APP_TASK', redis.get(spider_class.name + ':app_task').decode('utf-8'))
 
