@@ -3,7 +3,10 @@ import pathlib
 import oss2
 import ssl
 import json
+from io import BytesIO
 from kafka import KafkaProducer
+from minio import Minio
+
 from evascrapy.items import RawHtmlItem
 
 
@@ -48,6 +51,37 @@ class AliyunOssPipeline(object):
             spider.settings['APP_STORAGE_DEPTH']
         )
         self.get_oss_bucket(spider.settings).put_object('%s/%s' % (filepath, filename), item.to_string())
+        return item
+
+
+class AwsS3Pipeline(object):
+    _client = None
+
+    def get_client(self, settings) -> Minio:
+        if self._client:
+            return self._client
+
+        client = Minio(
+            settings['AWS_S3_ENDPOINT'],
+            access_key=settings['AWS_S3_ACCESS_KEY'],
+            secret_key=settings['AWS_S3_ACCESS_SECRET'],
+            region=settings['AWS_S3_REGION'],
+            secure=settings['AWS_S3_ACCESS_SECURE']
+        )
+        self._client = client
+        return client
+
+    def process_item(self, item: RawHtmlItem, spider) -> RawHtmlItem:
+        [filepath, filename] = HtmlFilePipeline.url_to_filepath(
+            item['url'],
+            '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
+            spider.settings['APP_STORAGE_DEPTH']
+        )
+        content = BytesIO(item.to_string().encode())
+        self.get_client(spider.settings).put_object(spider.settings['AWS_S3_DEFAULT_BUCKET'],
+                                                    '%s/%s' % (filepath, filename),
+                                                    content,
+                                                    content.getbuffer().nbytes)
         return item
 
 

@@ -39,6 +39,13 @@ KAFKA_SASL_CA_CERT_LOCATION = 'aliyun-kafka-ca-cert'
 KAFKA_SERVER_STRING = 'kafka-cn-internet.aliyun.com:8080'
 KAFKA_TOPIC = None
 
+AWS_S3_ENDPOINT = None
+AWS_S3_ACCESS_KEY = ''
+AWS_S3_REGION = None
+AWS_S3_ACCESS_SECRET = ''
+AWS_S3_ACCESS_SECURE = False
+AWS_S3_DEFAULT_BUCKET = ''
+
 # SCRAPY SETTINGS
 BOT_NAME = 'evascrapy'
 
@@ -124,11 +131,18 @@ for k, v in dict(os.environ).items():
     if k.isupper() and (k in globals() or k in vars(default_settings) or k in vars(defaults)):
         globals()[k] = os.getenv(k, v)
 
-ITEM_PIPELINES = {
-    'evascrapy.pipelines.AliyunOssPipeline': 300,
-} if APP_STORAGE == 'oss' else {
-    'evascrapy.pipelines.HtmlFilePipeline': 300,
-}
+if APP_STORAGE == 'file':
+    ITEM_PIPELINES = {
+        'evascrapy.pipelines.HtmlFilePipeline': 300,
+    }
+elif APP_STORAGE == 'oss':
+    ITEM_PIPELINES = {
+        'evascrapy.pipelines.AliyunOssPipeline': 300,
+    }
+elif APP_STORAGE == 's3':
+    ITEM_PIPELINES = {
+        'evascrapy.pipelines.AwsS3Pipeline': 300,
+    }
 
 if APP_MQ_NOTIFY:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600
