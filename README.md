@@ -127,9 +127,9 @@ Scrapy 基于单进程单线程的Twisted（Reactor模型）实现并发
 分布式运行基于 `Scrapy-Redis`， 并更改了退出行为， `Scrapy-Redis` 默认爬虫空闲时不会退出， EvaScrapy在爬虫空闲时会退出，因此需要先向Redis插入数据
 
 ```
-redis-cli lpush demo:start_urls https://avnpc.com
-redis-cli lpush wandoujia:start_urls http://www.wandoujia.com/category/app
-redis-cli lpush big5:start_urls http://mirlab.org/jang/books/html/metaCharset.asp
+redis-cli sadd demo:start_urls https://avnpc.com
+redis-cli sadd wandoujia:start_urls http://www.wandoujia.com/category/app
+redis-cli sadd big5:start_urls http://mirlab.org/jang/books/html/metaCharset.asp
 APP_DISTRIBUTED=1 scrapy crawl demo
 ```
 
