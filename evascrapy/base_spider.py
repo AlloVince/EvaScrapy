@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import time
+import math
 from scrapy.http import Response
 from scrapy.spiders import CrawlSpider
 from scrapy_redis.spiders import RedisCrawlSpider
@@ -25,4 +27,5 @@ class BaseSpider(RedisCrawlSpider if os.getenv('APP_DISTRIBUTED') else CrawlSpid
         self.close(self, 'RedisCrawlSpider closed by spider idle')
 
     def handle_item(self, response: Response) -> RawHtmlItem:
-        return RawHtmlItem(url=response.url, html=response.text, task=self.settings.get('APP_TASK'), version=self.version)
+        return RawHtmlItem(url=response.url, html=response.text, task=self.settings.get('APP_TASK'),
+                           version=self.version, timestamp=math.floor(time.time()))
