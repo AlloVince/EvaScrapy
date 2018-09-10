@@ -80,7 +80,9 @@ SpiderClass中定义
 
 - url
 - version
-- html
+- timestamp
+- task
+- content
 
 Item 存储格式为
 
@@ -94,7 +96,7 @@ raw html content
 
 ## 存储方式
 
-支持 本地文件 / Aliyun OSS 两种存储方式
+支持 本地文件 / Aliyun OSS / AWS S3 三种存储方式
 
 本地文件存储位置 `dl/{spider_name}/{app_task}`
 
