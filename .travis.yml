@@ -11,6 +11,7 @@ jobs:
         - pytest tests/
         - npm install
         - npm run travis-deploy-once "npm run semantic-release"
+        - docker build -t allovince/evascrapy .
         - docker tag allovince/evascrapy allovince/evascrapy:staging
         - docker images
         - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
