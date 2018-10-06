@@ -3,10 +3,13 @@ import pathlib
 import oss2
 import ssl
 import json
+import random
+import string
 from io import BytesIO
 from kafka import KafkaProducer
 from minio import Minio
-
+from mns.account import Account
+from mns.queue import Message
 from evascrapy.items import RawHtmlItem
 
 
@@ -96,7 +99,7 @@ class KafkaPipeline(object):
             spider.settings['APP_STORAGE_DEPTH']
         )
         command = json.dumps({
-            'messageId': '123',
+            'messageId': ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
             'queueName': spider.settings['KAFKA_TOPIC'],
             'content': {
                 'name': 'etl:%s' % spider.name,
@@ -141,4 +144,48 @@ class KafkaPipeline(object):
         future = self.get_producer(spider.settings).send(spider.settings['KAFKA_TOPIC'],
                                                          msg)
         future.get()
+        return item
+
+
+class AliyunMnsPipeline(object):
+    _mns_producer = None
+
+    @staticmethod
+    def item_to_mns_message(item, spider) -> bytes:
+        [filepath, filename] = HtmlFilePipeline.url_to_filepath(
+            item['url'],
+            '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
+            spider.settings['APP_STORAGE_DEPTH']
+        )
+        command = json.dumps({
+            'messageId': ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
+            'queueName': spider.settings['MNS_QUEUE_NAME'],
+            'content': {
+                'name': 'etl:%s' % spider.name,
+                'spec': {
+                    'storage': spider.settings['APP_STORAGE'],
+                    'uri': '/'.join([filepath, filename])
+                }
+            },
+            'command': 'etl:%s --storage=%s --uri=%s' % (
+                spider.name, spider.settings['APP_STORAGE'], '/'.join([filepath, filename]))
+        })
+        return command
+
+    def get_producer(self, settings):
+        if self._mns_producer:
+            return self._mns_producer
+
+        account = Account(
+            settings['MNS_ACCOUNT_ENDPOINT'],
+            settings['MNS_ACCESSKEY_ID'],
+            settings['MNS_ACCESSKEY_SECRET']
+        )
+        self._mns_producer = account.get_queue(settings['MNS_QUEUE_NAME'])
+        return self._mns_producer
+
+    def process_item(self, item, spider):
+        msg = Message(AliyunMnsPipeline.item_to_mns_message(item, spider))
+        future = self.get_producer(spider.settings)
+        future.send_message(msg)
         return item

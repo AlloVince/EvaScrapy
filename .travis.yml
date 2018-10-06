@@ -1,14 +1,17 @@
 language: python
-node_js:
-- 3.6
+python: 3.6
+node_js: 10
 install:
 - pip install
-script:
-- pytest
 jobs:
   include:
+    - stage: test
+      if: branch = master AND tag IS blank
+      script:
+        - pytest
+        - npm install
+        - npm run travis-deploy-once "npm run semantic-release"
     - stage: docker release
-      python: '3.6'
       if: tag IS present
       script:
         - docker build -t allovince/evascrapy .

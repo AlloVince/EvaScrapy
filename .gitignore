@@ -61,3 +61,4 @@ docs/_build/
 .pytest_cache
 
 evascrapy/spiders/*_spider.py
+node_modules

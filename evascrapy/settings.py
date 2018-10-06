@@ -15,7 +15,8 @@ load_dotenv(dotenv_path=os.path.dirname(os.path.realpath(__file__)) + '/../.env'
 APP_TASK = None
 APP_RUN_DEEP = False
 APP_SPIDER = 'demo'
-APP_MQ_NOTIFY = False
+APP_MQ_NOTIFY_KAFKA = False
+APP_MQ_NOTIFY_MNS = False
 APP_TIMEZONE = 'Asia/Chongqing'
 APP_STORAGE = 'file'
 APP_STORAGE_DEPTH = 3
@@ -28,6 +29,11 @@ OSS_ACCESS_KEY_ID = None
 OSS_ACCESS_KEY_SECRET = None
 OSS_ENDPOINT = 'http://oss-cn-hangzhou.aliyuncs.com'
 OSS_BUCKET = None
+
+MNS_ACCOUNT_ENDPOINT = None
+MNS_ACCESSKEY_ID = None
+MNS_ACCESSKEY_SECRET = None
+MNS_QUEUE_NAME = None
 
 KAFKA_SSL_ENABLE = False
 KAFKA_SSL_CERT_PATH = False
@@ -144,8 +150,11 @@ elif APP_STORAGE == 's3':
         'evascrapy.pipelines.AwsS3Pipeline': 300,
     }
 
-if APP_MQ_NOTIFY:
+if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600
+
+if APP_MQ_NOTIFY_MNS:
+    ITEM_PIPELINES['evascrapy.pipelines.AliyunMnsPipeline'] = 600
 
 if APP_DISTRIBUTED:
     SCHEDULER = 'scrapy_redis.scheduler.Scheduler'
