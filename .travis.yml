@@ -8,9 +8,14 @@ jobs:
     - stage: test
       if: branch = master AND tag IS blank
       script:
-        - pytest
+        - pytest tests/
         - npm install
         - npm run travis-deploy-once "npm run semantic-release"
+        - docker tag allovince/evascrapy allovince/evascrapy:staging
+        - docker images
+        - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+        - docker push allovince/evascrapy:staging;
+        - docker push allovince/evascrapy:staging;
     - stage: docker release
       if: tag IS present
       script:
