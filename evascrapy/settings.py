@@ -25,9 +25,9 @@ APP_DISTRIBUTED = False
 APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 
-APP_TORRENT_PIPELINE = False
-APP_TORRENT_PIPELINE_ROOT_PATH = 'dl/info_hash'
-APP_TORRENT_PIPELINE_DEPTH = 3
+TORRENT_FILE_PIPELINE = False
+TORRENT_FILE_PIPELINE_ROOT_PATH = 'dl/info_hash'
+TORRENT_FILE_PIPELINE_DEPTH = 3
 
 OSS_ACCESS_KEY_ID = None
 OSS_ACCESS_KEY_SECRET = None
@@ -151,10 +151,10 @@ elif APP_STORAGE == 'oss':
 elif APP_STORAGE == 's3':
     ITEM_PIPELINES['evascrapy.pipelines.AwsS3Pipeline'] = 300
 
-if APP_TORRENT_PIPELINE:
+if TORRENT_FILE_PIPELINE:
     ITEM_PIPELINES['evascrapy.pipelines.TorrentFilePipeLine'] = 1
     FILES_STORE = os.getenv('FILES_STORE') or os.path.dirname(
-        os.path.realpath(__file__)) + '/../' + APP_TORRENT_PIPELINE_ROOT_PATH
+        os.path.realpath(__file__)) + '/../' + TORRENT_FILE_PIPELINE_ROOT_PATH
 
 if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600
