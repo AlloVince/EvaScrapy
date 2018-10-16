@@ -3,7 +3,6 @@ import hashlib
 import json
 import random
 import string
-
 import bencode
 from scrapy import Item, Field
 
@@ -18,7 +17,48 @@ def url_to_filepath(url, root_path: str, depth=0, extension='html'):
     ]
 
 
-class RawTextItem(Item):
+def hash_to_filepath(hash: str, root_path: str, depth: int = 0, extension: str = 'torrent'):
+    chunk_size = 2
+    hash_chunks = [hash[i:i + chunk_size] for i in range(0, len(hash), chunk_size)]
+    return [
+        '/'.join([root_path] + [i for i in hash_chunks[0:int(depth)]]),
+        '%s.%s' % (''.join([i for i in hash_chunks[int(depth):]]), extension)
+    ]
+
+
+def random_id() -> str:
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+
+def get_command(command_name: str, queue_name: str, filepath: str, spider) -> str:
+    return json.dumps({
+        'messageId': random_id(),
+        'queueName': queue_name,
+        'content': {
+            'name': command_name,
+            'spec': {
+                'storage': spider.settings['APP_STORAGE'],
+                'uri': filepath
+            }
+        },
+        'command': '%s --storage=%s --uri=%s' % (
+            command_name, spider.settings['APP_STORAGE'], filepath
+        )
+    })
+
+
+class QueueBasedItem(Item):
+    def to_filepath(self, spider):
+        pass
+
+    def to_mns_message(self, spider):
+        pass
+
+    def to_kafka_message(self, spider):
+        pass
+
+
+class RawTextItem(QueueBasedItem):
     url: bytes = Field()
     version: str = Field()
     task: str = Field()
@@ -35,40 +75,25 @@ class RawTextItem(Item):
         return '/'.join([filepath, filename])
 
     def to_mns_message(self, spider):
-        filepath = self.to_filepath(spider)
-        command = json.dumps({
-            'messageId': ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
-            'queueName': spider.settings['MNS_QUEUE_NAME'],
-            'content': {
-                'name': 'etl:%s' % spider.name,
-                'spec': {
-                    'storage': spider.settings['APP_STORAGE'],
-                    'uri': filepath
-                }
-            },
-            'command': 'etl:%s --storage=%s --uri=%s' % (
-                spider.name, spider.settings['APP_STORAGE'], filepath
-            )
-        })
+        command = get_command(
+            command_name='etl:%s' % spider.name,
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['MNS_QUEUE_NAME'],
+            spider=spider,
+        )
         return command
 
     def to_kafka_message(self, spider):
-        filepath = self.to_filepath(spider)
-        command = json.dumps({
-            'messageId': ''.join(random.choices(string.ascii_uppercase + string.digits, k=10)),
-            'queueName': spider.settings['KAFKA_TOPIC'],
-            'content': {
-                'name': 'etl:%s' % spider.name,
-                'spec': {
-                    'storage': spider.settings['APP_STORAGE'],
-                    'uri': filepath
-                }
-            },
-            'command': 'etl:%s --storage=%s --uri=%s' % (
-                spider.name, spider.settings['APP_STORAGE'], filepath
-            )
-        })
+        command = get_command(
+            command_name='etl:%s' % spider.name,
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['KAFKA_TOPIC'],
+            spider=spider,
+        )
         return bytes(command, encoding='utf8')
+
+    def to_string(self):
+        pass
 
 
 class RawJsonItem(RawTextItem):
@@ -100,20 +125,49 @@ class RawHtmlItem(RawTextItem):
             self['url'], self['version'], self['task'], self['timestamp'], self['html'])
 
 
-class BinaryFileItem(Item):
+class BinaryFileItem(QueueBasedItem):
     url: bytes = Field()
     version: str = Field()
     task: str = Field()
     timestamp: int = Field()
     from_url: str = Field()
+    body: bytes = Field()
 
     def __repr__(self):
         return "<BinaryFileItem %s from %s>" % (self['url'], len(self['from_url']))
 
+    def to_bytes(self) -> bytes:
+        return self['body']
+
+    def to_filepath(self, spider):
+        [filepath, filename] = hash_to_filepath(
+            self.get_info_hash(),
+            '/'.join([spider.settings['TORRENT_FILE_PIPELINE_ROOT_PATH']]),
+            spider.settings['TORRENT_FILE_PIPELINE_DEPTH']
+        )
+        return '/'.join([filepath, filename])
+
+    def to_mns_message(self, spider):
+        command = get_command(
+            command_name='etl:torrent',
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['MNS_QUEUE_NAME'],
+            spider=spider,
+        )
+        return command
+
+    def to_kafka_message(self, spider):
+        command = get_command(
+            command_name='etl:torrent',
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['KAFKA_TOPIC'],
+            spider=spider,
+        )
+        return bytes(command, encoding='utf8')
+
 
 class TorrentFileItem(BinaryFileItem):
     # info_hash: str = Field()
-    body: bytes = Field()
 
     # info_hash = None
 

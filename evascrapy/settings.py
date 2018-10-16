@@ -145,16 +145,16 @@ for k, v in dict(os.environ).items():
         globals()[k] = os.getenv(k, v)
 
 if APP_STORAGE == 'file':
-    ITEM_PIPELINES['evascrapy.pipelines.HtmlFilePipeline'] = 300
+    ITEM_PIPELINES['evascrapy.pipelines.LocalFilePipeline'] = 300
 elif APP_STORAGE == 'oss':
     ITEM_PIPELINES['evascrapy.pipelines.AliyunOssPipeline'] = 300
 elif APP_STORAGE == 's3':
     ITEM_PIPELINES['evascrapy.pipelines.AwsS3Pipeline'] = 300
 
-if TORRENT_FILE_PIPELINE:
-    ITEM_PIPELINES['evascrapy.pipelines.TorrentFilePipeLine'] = 1
-    FILES_STORE = os.getenv('FILES_STORE') or os.path.dirname(
-        os.path.realpath(__file__)) + '/../' + TORRENT_FILE_PIPELINE_ROOT_PATH
+# if TORRENT_FILE_PIPELINE:
+#     ITEM_PIPELINES['evascrapy.pipelines.TorrentFilePipeLine'] = 1
+#     FILES_STORE = os.getenv('FILES_STORE') or os.path.dirname(
+#         os.path.realpath(__file__)) + '/../' + TORRENT_FILE_PIPELINE_ROOT_PATH
 
 if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600

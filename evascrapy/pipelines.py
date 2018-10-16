@@ -7,79 +7,21 @@ from kafka import KafkaProducer
 from minio import Minio
 from mns.account import Account
 from mns.queue import Message
-from evascrapy.items import RawTextItem, TorrentFileItem
+from evascrapy.items import QueueBasedItem, RawTextItem
 
 
-class TorrentFilePipeLine(object):
-    @staticmethod
-    def hash_to_filepath(hash: str, root_path: str, depth: int = 0, extension: str = 'torrent'):
-        chunk_size = 2
-        hash_chunks = [hash[i:i + chunk_size] for i in range(0, len(hash), chunk_size)]
-        return [
-            '/'.join([root_path] + [i for i in hash_chunks[0:int(depth)]]),
-            '%s.%s' % (''.join([i for i in hash_chunks[int(depth):]]), extension)
-        ]
-
-    def process_item(self, item: TorrentFileItem, spider) -> TorrentFileItem:
-        if not isinstance(item, TorrentFileItem):
-            return item
-
-        [filepath, filename] = TorrentFilePipeLine.hash_to_filepath(
-            item.get_info_hash(),
-            '/'.join([spider.settings['TORRENT_FILE_PIPELINE_ROOT_PATH']]),
-            spider.settings['TORRENT_FILE_PIPELINE_DEPTH']
-        )
-        print(filepath, filename)
-        pathlib.Path(filepath).mkdir(parents=True, exist_ok=True)
-        with open('/'.join([filepath, filename]), 'wb') as f:
-            f.write(item['body'])
-
-        return item
-
-
-# class TorrentFilePipeLine(FilesPipeline):
-#     @staticmethod
-#     def hash_to_filepath(hash: str, root_path: str, depth: int = 0, extension: str = 'torrent'):
-#         chunk_size = 2
-#         hash_chunks = [hash[i:i + chunk_size] for i in range(0, len(hash), chunk_size)]
-#         return [
-#             '/'.join([root_path] + [i for i in hash_chunks[0:int(depth)]]),
-#             '%s.%s' % (''.join([i for i in hash_chunks[int(depth):]]), extension)
-#         ]
-#
-#     def file_path(self, request: Request, response: Response = None, info=None):
-#         if not isinstance(request, Request):
-#             url = request
-#         else:
-#             url = request.url
-#         if not hasattr(self.file_key, '_base'):
-#             return self.file_key(url)
-#
-#         if not response:
-#             url_hash = hashlib.sha1(to_bytes(url)).hexdigest()
-#             return 'urlhash/%s%s' % (url_hash, '.torrent')
-#
-#         torrent = bencode.bdecode(response.body).get('info')
-#         info_hash = hashlib.sha1(bencode.bencode(torrent)).hexdigest()
-#         spider = info.spider
-#         [filepath, filename] = TorrentFilePipeLine.hash_to_filepath(
-#             info_hash,
-#             '',
-#             spider.settings['TORRENT_FILE_PIPELINE_DEPTH']
-#         )
-#
-#         return '%s/%s' % (filepath, filename)
-#
-
-class HtmlFilePipeline(object):
-    def process_item(self, item: RawTextItem, spider) -> RawTextItem:
-        if not isinstance(item, RawTextItem):
+class LocalFilePipeline(object):
+    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+        if not isinstance(item, QueueBasedItem):
             return item
 
         filepath = item.to_filepath(spider)
         pathlib.Path(os.path.dirname(filepath)).mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w+') as f:
-            f.write(item.to_string())
+        mode = 'w+' if isinstance(item, RawTextItem) else 'wb+'
+        with open(filepath, mode) as f:
+            f.write(
+                item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
+            )
         return item
 
 
@@ -94,14 +36,15 @@ class AliyunOssPipeline(object):
         self._oss_bucket = oss2.Bucket(auth, settings['OSS_ENDPOINT'], settings['OSS_BUCKET'])
         return self._oss_bucket
 
-    def process_item(self, item: RawTextItem, spider) -> RawTextItem:
-        if not isinstance(item, RawTextItem):
+    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+        if not isinstance(item, QueueBasedItem):
             return item
 
         self.get_oss_bucket(
             spider.settings
         ).put_object(
-            item.to_filepath(spider), item.to_string()
+            item.to_filepath(spider),
+            item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
         )
         return item
 
@@ -168,8 +111,8 @@ class KafkaPipeline(object):
             )
         return self._kafka_producer
 
-    def process_item(self, item: RawTextItem, spider) -> RawTextItem:
-        if not isinstance(item, RawTextItem):
+    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+        if not isinstance(item, QueueBasedItem):
             return item
 
         future = self.get_producer(
@@ -198,7 +141,7 @@ class AliyunMnsPipeline(object):
         return self._mns_producer
 
     def process_item(self, item, spider):
-        if not isinstance(item, RawTextItem):
+        if not isinstance(item, QueueBasedItem):
             return item
 
         msg = Message(item.to_mns_message(spider))
