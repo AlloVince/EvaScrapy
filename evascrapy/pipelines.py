@@ -5,12 +5,49 @@ import ssl
 import json
 import random
 import string
+import bencode
+from scrapy.pipelines.files import FilesPipeline
+from scrapy.http import Request, Response
 from io import BytesIO
 from kafka import KafkaProducer
 from minio import Minio
 from mns.account import Account
 from mns.queue import Message
 from evascrapy.items import RawHtmlItem
+from scrapy.utils.python import to_bytes
+
+class TorrentFilePipeLine(FilesPipeline):
+    @staticmethod
+    def hash_to_filepath(hash: str, root_path: str, depth: int = 0, extension: str = 'torrent'):
+        chunk_size = 2
+        hash_chunks = [hash[i:i + chunk_size] for i in range(0, len(hash), chunk_size)]
+        return [
+            '/'.join([root_path] + [i for i in hash_chunks[0:int(depth)]]),
+            '%s.%s' % (''.join([i for i in hash_chunks[int(depth):]]), extension)
+        ]
+
+    def file_path(self, request: Request, response: Response = None, info=None):
+        if not isinstance(request, Request):
+            url = request
+        else:
+            url = request.url
+        if not hasattr(self.file_key, '_base'):
+            return self.file_key(url)
+
+        if not response:
+            url_hash = hashlib.sha1(to_bytes(url)).hexdigest()
+            return 'urlhash/%s%s' % (url_hash, '.torrent')
+
+        torrent = bencode.bdecode(response.body).get('info')
+        info_hash = hashlib.sha1(bencode.bencode(torrent)).hexdigest()
+        spider = info.spider
+        [filepath, filename] = TorrentFilePipeLine.hash_to_filepath(
+            info_hash,
+            '',
+            spider.settings['APP_TORRENT_PIPELINE_DEPTH']
+        )
+
+        return '%s/%s' % (filepath, filename)
 
 
 class HtmlFilePipeline(object):
@@ -25,6 +62,9 @@ class HtmlFilePipeline(object):
         ]
 
     def process_item(self, item: RawHtmlItem, spider) -> RawHtmlItem:
+        if not isinstance(item, RawHtmlItem):
+            return item
+
         [filepath, filename] = HtmlFilePipeline.url_to_filepath(
             item['url'],
             '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
@@ -48,6 +88,9 @@ class AliyunOssPipeline(object):
         return self._oss_bucket
 
     def process_item(self, item: RawHtmlItem, spider) -> RawHtmlItem:
+        if not isinstance(item, RawHtmlItem):
+            return item
+
         [filepath, filename] = HtmlFilePipeline.url_to_filepath(
             item['url'],
             '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
@@ -75,6 +118,9 @@ class AwsS3Pipeline(object):
         return client
 
     def process_item(self, item: RawHtmlItem, spider) -> RawHtmlItem:
+        if not isinstance(item, RawHtmlItem):
+            return item
+
         [filepath, filename] = HtmlFilePipeline.url_to_filepath(
             item['url'],
             '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
@@ -140,6 +186,9 @@ class KafkaPipeline(object):
         return self._kafka_producer
 
     def process_item(self, item: RawHtmlItem, spider) -> RawHtmlItem:
+        if not isinstance(item, RawHtmlItem):
+            return item
+
         msg = KafkaPipeline.item_to_kafka_message(item, spider)
         future = self.get_producer(spider.settings).send(spider.settings['KAFKA_TOPIC'],
                                                          msg)
@@ -185,6 +234,9 @@ class AliyunMnsPipeline(object):
         return self._mns_producer
 
     def process_item(self, item, spider):
+        if not isinstance(item, RawHtmlItem):
+            return item
+
         msg = Message(AliyunMnsPipeline.item_to_mns_message(item, spider))
         future = self.get_producer(spider.settings)
         future.send_message(msg)

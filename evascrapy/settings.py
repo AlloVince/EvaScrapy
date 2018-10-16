@@ -25,6 +25,10 @@ APP_DISTRIBUTED = False
 APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 
+APP_TORRENT_PIPELINE = False
+APP_TORRENT_PIPELINE_ROOT_PATH = 'dl/info_hash'
+APP_TORRENT_PIPELINE_DEPTH = 3
+
 OSS_ACCESS_KEY_ID = None
 OSS_ACCESS_KEY_SECRET = None
 OSS_ENDPOINT = 'http://oss-cn-hangzhou.aliyuncs.com'
@@ -100,6 +104,9 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
 }
 
+ITEM_PIPELINES = {
+}
+
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
 # EXTENSIONS = {
@@ -138,17 +145,16 @@ for k, v in dict(os.environ).items():
         globals()[k] = os.getenv(k, v)
 
 if APP_STORAGE == 'file':
-    ITEM_PIPELINES = {
-        'evascrapy.pipelines.HtmlFilePipeline': 300,
-    }
+    ITEM_PIPELINES['evascrapy.pipelines.HtmlFilePipeline'] = 300
 elif APP_STORAGE == 'oss':
-    ITEM_PIPELINES = {
-        'evascrapy.pipelines.AliyunOssPipeline': 300,
-    }
+    ITEM_PIPELINES['evascrapy.pipelines.AliyunOssPipeline'] = 300
 elif APP_STORAGE == 's3':
-    ITEM_PIPELINES = {
-        'evascrapy.pipelines.AwsS3Pipeline': 300,
-    }
+    ITEM_PIPELINES['evascrapy.pipelines.AwsS3Pipeline'] = 300
+
+if APP_TORRENT_PIPELINE:
+    ITEM_PIPELINES['evascrapy.pipelines.TorrentFilePipeLine'] = 1
+    FILES_STORE = os.getenv('FILES_STORE') or os.path.dirname(
+        os.path.realpath(__file__)) + '/../' + APP_TORRENT_PIPELINE_ROOT_PATH
 
 if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600
