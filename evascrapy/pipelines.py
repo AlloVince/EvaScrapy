@@ -11,7 +11,7 @@ from evascrapy.items import QueueBasedItem, RawTextItem
 
 
 class LocalFilePipeline(object):
-    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
@@ -36,15 +36,15 @@ class AliyunOssPipeline(object):
         self._oss_bucket = oss2.Bucket(auth, settings['OSS_ENDPOINT'], settings['OSS_BUCKET'])
         return self._oss_bucket
 
-    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
         self.get_oss_bucket(
             spider.settings
         ).put_object(
-            item.to_filepath(spider),
-            item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
+            key=item.to_filepath(spider),
+            data=item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
         )
         return item
 
@@ -66,18 +66,19 @@ class AwsS3Pipeline(object):
         self._client = client
         return client
 
-    def process_item(self, item: RawTextItem, spider) -> RawTextItem:
-        if not isinstance(item, RawTextItem):
+    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
+        if not isinstance(item, QueueBasedItem):
             return item
 
-        content = BytesIO(item.to_string().encode())
+        content = BytesIO(item.to_string().encode()) if isinstance(item, RawTextItem) else BytesIO(item.to_bytes())
         self.get_client(
             spider.settings
         ).put_object(
-            spider.settings['AWS_S3_DEFAULT_BUCKET'],
-            item.to_filepath(spider),
-            content,
-            content.getbuffer().nbytes
+            bucket_name=spider.settings['AWS_S3_DEFAULT_BUCKET'],
+            object_name=item.to_filepath(spider),
+            data=content,
+            length=content.getbuffer().nbytes,
+            metadata=item.get_meta(),
         )
         return item
 
@@ -111,7 +112,7 @@ class KafkaPipeline(object):
             )
         return self._kafka_producer
 
-    def process_item(self, item: QueueBasedItem, spider) -> RawTextItem:
+    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
@@ -140,7 +141,7 @@ class AliyunMnsPipeline(object):
         self._mns_producer = account.get_queue(settings['MNS_QUEUE_NAME'])
         return self._mns_producer
 
-    def process_item(self, item, spider):
+    def process_item(self, item, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 

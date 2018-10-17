@@ -57,6 +57,9 @@ class QueueBasedItem(Item):
     def to_kafka_message(self, spider):
         pass
 
+    def get_meta(self):
+        return None
+
 
 class RawTextItem(QueueBasedItem):
     url: bytes = Field()
@@ -176,6 +179,9 @@ class TorrentFileItem(BinaryFileItem):
         torrent = bencode.bdecode(self['body']).get('info')
         self['info_hash'] = hashlib.sha1(bencode.bencode(torrent)).hexdigest()
         return self['info_hash']
+
+    def get_meta(self):
+        return {'url': self['url'], 'from_url': self['from_url']}
 
     def __repr__(self):
         return "<TorrentFileItem hash %s from %s>" % (self['url'], self['from_url'])
