@@ -24,6 +24,7 @@ APP_STORAGE_ROOT_PATH = 'dl'
 APP_DISTRIBUTED = False
 APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
+APP_RANDOM_UA = False
 
 TORRENT_FILE_PIPELINE = False
 TORRENT_FILE_PIPELINE_ROOT_PATH = 'dl/info_hash'
@@ -100,8 +101,6 @@ NEWSPIDER_MODULE = 'evascrapy.spiders'
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
 }
 
 ITEM_PIPELINES = {
@@ -144,17 +143,16 @@ for k, v in dict(os.environ).items():
     if k.isupper() and (k in globals() or k in vars(default_settings) or k in vars(defaults)):
         globals()[k] = os.getenv(k, v)
 
+if APP_RANDOM_UA:
+    DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.useragent.UserAgentMiddleware'] = None
+    DOWNLOADER_MIDDLEWARES['scrapy_fake_useragent.middleware.RandomUserAgentMiddleware'] = 400
+
 if APP_STORAGE == 'file':
     ITEM_PIPELINES['evascrapy.pipelines.LocalFilePipeline'] = 300
 elif APP_STORAGE == 'oss':
     ITEM_PIPELINES['evascrapy.pipelines.AliyunOssPipeline'] = 300
 elif APP_STORAGE == 's3':
     ITEM_PIPELINES['evascrapy.pipelines.AwsS3Pipeline'] = 300
-
-# if TORRENT_FILE_PIPELINE:
-#     ITEM_PIPELINES['evascrapy.pipelines.TorrentFilePipeLine'] = 1
-#     FILES_STORE = os.getenv('FILES_STORE') or os.path.dirname(
-#         os.path.realpath(__file__)) + '/../' + TORRENT_FILE_PIPELINE_ROOT_PATH
 
 if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600

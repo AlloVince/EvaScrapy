@@ -167,18 +167,15 @@ class BinaryFileItem(QueueBasedItem):
 
 
 class TorrentFileItem(BinaryFileItem):
-    # info_hash: str = Field()
-
-    # info_hash = None
+    info_hash: str = Field()
 
     def get_info_hash(self):
-        # if self['info_hash']:
-        #     return self['info_hash']
+        if self.get('info_hash'):
+            return self.get('info_hash')
 
         torrent = bencode.bdecode(self['body']).get('info')
-        return hashlib.sha1(bencode.bencode(torrent)).hexdigest()
-        # self['info_hash'] = hashlib.sha1(bencode.bencode(torrent)).hexdigest()
-        # return self['info_hash']
+        self['info_hash'] = hashlib.sha1(bencode.bencode(torrent)).hexdigest()
+        return self['info_hash']
 
     def __repr__(self):
         return "<TorrentFileItem hash %s from %s>" % (self['url'], self['from_url'])
