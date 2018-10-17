@@ -73,7 +73,7 @@ class RawTextItem(QueueBasedItem):
             self['url'],
             '/'.join([spider.settings['APP_STORAGE_ROOT_PATH'], spider.name, spider.settings['APP_TASK']]),
             spider.settings['APP_STORAGE_DEPTH'],
-            self['extension']
+            self.extension
         )
         return '/'.join([filepath, filename])
 

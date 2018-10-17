@@ -167,6 +167,14 @@ APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 ```
 
+## Memo
+
+快速清除Redis
+
+```
+redis-cli KEYS "spider_name:*" | xargs redis-cli DEL
+```
+
 ## TODO:
 
 - Ajax support
