@@ -63,6 +63,8 @@ BOT_NAME = 'evascrapy'
 SPIDER_MODULES = ['evascrapy.spiders']
 NEWSPIDER_MODULE = 'evascrapy.spiders'
 
+COOKIES_GLOBAL = None
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'evascrapy (+http://www.yourdomain.com)'
 
@@ -142,6 +144,10 @@ REDIS_URL = 'redis://docker.for.mac.host.localhost:6379'
 for k, v in dict(os.environ).items():
     if k.isupper() and (k in globals() or k in vars(default_settings) or k in vars(defaults)):
         globals()[k] = os.getenv(k, v)
+
+if COOKIES_GLOBAL:
+    DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.cookies.CookiesMiddleware'] = None
+    DOWNLOADER_MIDDLEWARES['evascrapy.middlewares.GlobalCookiesMiddleware'] = 700
 
 if APP_RANDOM_UA:
     DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.useragent.UserAgentMiddleware'] = None

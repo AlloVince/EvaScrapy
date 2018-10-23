@@ -184,7 +184,7 @@ class TorrentFileItem(BinaryFileItem):
         return {'url': self['url'], 'from_url': self['from_url']}
 
     def __repr__(self):
-        return "<TorrentFileItem hash %s from %s>" % (self['url'], self['from_url'])
+        return "<TorrentFileItem hash %s %s from %s>" % (self.get_info_hash(), self['url'], self['from_url'])
 
 
 class FilesItem(Item):

@@ -8,6 +8,10 @@ from minio import Minio
 from mns.account import Account
 from mns.queue import Message
 from evascrapy.items import QueueBasedItem, RawTextItem
+import urllib3
+
+# default timeout for minio
+urllib3.Timeout.DEFAULT_TIMEOUT = 5.0
 
 
 class LocalFilePipeline(object):
