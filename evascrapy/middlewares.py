@@ -1,8 +1,5 @@
-import logging
 from scrapy.downloadermiddlewares.cookies import CookiesMiddleware
 from http.cookies import SimpleCookie
-
-logger = logging.getLogger(__name__)
 
 
 class GlobalCookiesMiddleware(CookiesMiddleware):

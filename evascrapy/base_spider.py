@@ -16,11 +16,11 @@ class BaseSpider(RedisCrawlSpider if os.getenv('APP_DISTRIBUTED') else CrawlSpid
     def __init__(self, *a, **kw):
         if os.getenv('APP_RUN_DEEP'):
             if hasattr(self, 'deep_start_urls'):
-                self.start_urls = self.deep_start_urls
+                self.start_urls = self.deep_start_urls or self.start_urls
             if hasattr(self, 'deep_rules'):
-                self.rules = self.deep_rules
+                self.rules = self.deep_rules or self.rules
             if hasattr(self, 'deep_allowed_domains'):
-                self.allowed_domains = self.deep_allowed_domains
+                self.allowed_domains = self.deep_allowed_domains or self.allowed_domains
         super(BaseSpider, self).__init__(*a, **kw)
 
     def spider_idle(self):
