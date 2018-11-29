@@ -1,4 +1,4 @@
-Scrapy===1.5.1
+Scrapy===1.5.0
 Scrapy-Redis==0.6.8
 scrapy-fake-useragent==1.1.0
 Redis===2.10.6
