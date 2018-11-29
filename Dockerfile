@@ -7,7 +7,7 @@ RUN apk add --no-cache openssl-dev libffi-dev make gcc musl-dev libxml2-dev libx
 
 COPY . /opt/htdocs/evascrapy
 WORKDIR /opt/htdocs/evascrapy
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 EXPOSE 6000
 CMD python start.py
