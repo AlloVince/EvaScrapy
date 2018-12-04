@@ -8,6 +8,7 @@ from minio import Minio
 from mns.account import Account
 from mns.queue import Message
 from evascrapy.items import QueueBasedItem, RawTextItem
+import logging
 import urllib3
 
 # default timeout for minio
@@ -138,9 +139,11 @@ class AliyunMnsPipeline(object):
             return self._mns_producer
 
         account = Account(
-            settings['MNS_ACCOUNT_ENDPOINT'],
-            settings['MNS_ACCESSKEY_ID'],
-            settings['MNS_ACCESSKEY_SECRET']
+            host=settings['MNS_ACCOUNT_ENDPOINT'],
+            access_id=settings['MNS_ACCESSKEY_ID'],
+            access_key=settings['MNS_ACCESSKEY_SECRET'],
+            logger=logging.getLogger('evascrapy.pipelines.AliyunMnsPipeline'),
+            debug=False,
         )
         self._mns_producer = account.get_queue(settings['MNS_QUEUE_NAME'])
         return self._mns_producer

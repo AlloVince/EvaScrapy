@@ -65,6 +65,8 @@ NEWSPIDER_MODULE = 'evascrapy.spiders'
 
 COOKIES_GLOBAL = None
 
+ANTI_CLOUDFLARE = None
+
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'evascrapy (+http://www.yourdomain.com)'
 
@@ -119,6 +121,8 @@ ITEM_PIPELINES = {
 # REDIS_URL = 'redis://localhost:6379'
 REDIS_URL = 'redis://docker.for.mac.host.localhost:6379'
 
+LOG_FORMATTER = 'evascrapy.logformatter.LogFormatter'
+
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 # AUTOTHROTTLE_ENABLED = True
@@ -152,6 +156,9 @@ if COOKIES_GLOBAL:
 if APP_RANDOM_UA:
     DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.useragent.UserAgentMiddleware'] = None
     DOWNLOADER_MIDDLEWARES['scrapy_fake_useragent.middleware.RandomUserAgentMiddleware'] = 400
+
+if ANTI_CLOUDFLARE:
+    DOWNLOADER_MIDDLEWARES['evascrapy.middlewares.CloudFlareMiddleware'] = 560
 
 if APP_STORAGE == 'file':
     ITEM_PIPELINES['evascrapy.pipelines.LocalFilePipeline'] = 300

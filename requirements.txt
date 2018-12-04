@@ -1,12 +1,15 @@
+-e git+https://github.com/AlloVince/aliyun-mns.git@master#egg=aliyun-mns
+
+
 Scrapy===1.5.1
 Scrapy-Redis==0.6.8
 scrapy-fake-useragent==1.1.0
-Redis===2.10.6
-python-dotenv===0.8.2
+redis===3.0.1
+python-dotenv===0.9.1
 oss2===2.6.0
 apscheduler===3.5.3
-minio===4.0.6
-aliyun-mns===1.1.5
+minio===4.0.7
 bencode.py===2.0.0
 pytz===2018.7
 kafka-python===1.4.4
+cfscrape===1.9.5
