@@ -21,17 +21,11 @@ steps:
       branch: master
       event: push
 
-  - name: install
-    image: python:3.6
-    commands:
-      - pip install -r requirements.txt
-    when:
-      branch: master
-      event: push
-
   - name: unit-test
     image: python:3.6
     commands:
+      - pip install -r requirements.txt
+      - pip install pytest
       - pytest tests/
     when:
       branch: master
