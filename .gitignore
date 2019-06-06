@@ -63,3 +63,4 @@ docs/_build/
 evascrapy/spiders/*_spider.py
 node_modules
 src
+.DS_Store

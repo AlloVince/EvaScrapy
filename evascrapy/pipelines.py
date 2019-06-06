@@ -2,14 +2,18 @@ import pathlib
 import oss2
 import ssl
 import os
+from urllib.parse import urlparse
 from io import BytesIO
 from kafka import KafkaProducer
 from minio import Minio
 from mns.account import Account
 from mns.queue import Message
-from evascrapy.items import QueueBasedItem, RawTextItem
+from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem
 import logging
 import urllib3
+from elasticsearch import Elasticsearch
+
+logger = logging.getLogger(__name__)
 
 # default timeout for minio
 urllib3.Timeout.DEFAULT_TIMEOUT = 5.0
@@ -155,4 +159,36 @@ class AliyunMnsPipeline(object):
         msg = Message(item.to_mns_message(spider))
         future = self.get_producer(spider.settings)
         future.send_message(msg)
+        return item
+
+
+class ElasticDupePipeline(object):
+    _es = None
+
+    def get_elastic(self, settings) -> Elasticsearch:
+        if self._es:
+            return self._es
+
+        url = urlparse(settings['TORRENT_FILE_ELASTIC_DUPE_URL'])
+        http_auth = (url.username, url.password) if url.username and url.password else None
+        self._es = Elasticsearch(
+            url.hostname,
+            http_auth=http_auth,
+            scheme=url.scheme,
+            port=url.port, )
+
+        return self._es
+
+    def process_item(self, item, spider) -> QueueBasedItem or None:
+        if not isinstance(item, TorrentFileItem):
+            return item
+
+        if self.get_elastic(spider.settings).exists(
+                index=spider.settings['TORRENT_FILE_ELASTIC_DUPE_INDICE'],
+                doc_type=spider.settings['TORRENT_FILE_ELASTIC_DUPE_DOCTYPE'],
+                id=item.get_info_hash(),
+        ):
+            logger.info('Torrent item %s ignored by pipelines.ElasticDupePipeline', item.get_info_hash())
+            return None
+
         return item

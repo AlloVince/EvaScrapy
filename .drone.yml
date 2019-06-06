@@ -1,0 +1,79 @@
+kind: pipeline
+name: deploy-javken
+
+steps:
+  - name: pre-check
+    image: docker
+    environment:
+      DOCKER_PASSWORD:
+        from_secret: DOCKER_PASSWORD
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+    commands:
+      - echo $${DOCKER_PASSWORD}
+      - echo $${GITHUB_TOKEN}
+
+  - name: build-log
+    image: node:10
+    commands:
+      - make drone-build-log
+    when:
+      branch: master
+      event: push
+
+  - name: install
+    image: python:3.6
+    commands:
+      - pip install -r requirements.txt
+    when:
+      branch: master
+      event: push
+
+  - name: unit-test
+    image: python:3.6
+    commands:
+      - pytest tests/
+    when:
+      branch: master
+      event: push
+
+  - name: push-docker-staging
+    image: plugins/docker
+    settings:
+      repo: allovince/evascrapy
+      username: allovince
+      registry: docker.io
+      password:
+        from_secret: DOCKER_PASSWORD
+      tag:
+        - staging
+      dockerfile: ./Dockerfile
+    when:
+      branch: master
+      event: push
+
+  - name: semantic-release
+    image: gtramontina/semantic-release:15.13.3
+    environment:
+      GITHUB_TOKEN:
+        from_secret: GITHUB_TOKEN
+    entrypoint:
+      - semantic-release
+    when:
+      branch: master
+      event: push
+
+  - name: push-docker-staging
+    image: plugins/docker
+    settings:
+      repo: allovince/evascrapy
+      username: allovince
+      registry: docker.io
+      password:
+        from_secret: DOCKER_PASSWORD
+      tag:
+        - ${DRONE_TAG}
+        - latest
+      dockerfile: ./Dockerfile
+    when:
+      event: tag

@@ -26,9 +26,14 @@ APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 APP_RANDOM_UA = False
 
-TORRENT_FILE_PIPELINE = False
 TORRENT_FILE_PIPELINE_ROOT_PATH = 'dl/info_hash'
 TORRENT_FILE_PIPELINE_DEPTH = 3
+
+TORRENT_FILE_ELASTIC_DUPE = False
+# DUPE_URL as https://user:pass@domain:443/
+TORRENT_FILE_ELASTIC_DUPE_URL = None
+TORRENT_FILE_ELASTIC_DUPE_INDICE = None
+TORRENT_FILE_ELASTIC_DUPE_DOCTYPE = None
 
 OSS_ACCESS_KEY_ID = None
 OSS_ACCESS_KEY_SECRET = None
@@ -167,11 +172,15 @@ elif APP_STORAGE == 'oss':
 elif APP_STORAGE == 's3':
     ITEM_PIPELINES['evascrapy.pipelines.AwsS3Pipeline'] = 300
 
+if TORRENT_FILE_ELASTIC_DUPE:
+    ITEM_PIPELINES['evascrapy.pipelines.ElasticDupePipeline'] = 100
+
 if APP_MQ_NOTIFY_KAFKA:
     ITEM_PIPELINES['evascrapy.pipelines.KafkaPipeline'] = 600
 
 if APP_MQ_NOTIFY_MNS:
     ITEM_PIPELINES['evascrapy.pipelines.AliyunMnsPipeline'] = 600
+
 
 if APP_DISTRIBUTED:
     SCHEDULER = 'scrapy_redis.scheduler.Scheduler'
