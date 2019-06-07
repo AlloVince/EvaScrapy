@@ -5,7 +5,7 @@ import math
 from scrapy.http import Response
 from scrapy.spiders import CrawlSpider
 from scrapy_redis.spiders import RedisCrawlSpider
-from evascrapy.items import RawHtmlItem
+from evascrapy.items import RawHtmlItem, TorrentFileItem
 
 
 class BaseSpider(RedisCrawlSpider if os.getenv('APP_DISTRIBUTED') else CrawlSpider):
@@ -29,3 +29,14 @@ class BaseSpider(RedisCrawlSpider if os.getenv('APP_DISTRIBUTED') else CrawlSpid
     def handle_item(self, response: Response) -> RawHtmlItem:
         return RawHtmlItem(url=response.url, html=response.text, task=self.settings.get('APP_TASK'),
                            version=self.version, timestamp=math.floor(time.time()))
+
+    def handle_torrent(self, response: Response) -> TorrentFileItem:
+        from_url = response.request.headers.get('Referer', None)
+        return TorrentFileItem(
+            url=response.url,
+            from_url=str(from_url, encoding='utf-8') if from_url else '',
+            task=self.settings.get('APP_TASK'),
+            version=self.version,
+            timestamp=math.floor(time.time()),
+            body=response.body,
+        )
