@@ -14,4 +14,5 @@ pytz===2018.7
 kafka-python===1.4.4
 cfscrape===1.9.5
 elasticsearch===6.4.0
+urllib3==1.23
 requests===2.17.3
