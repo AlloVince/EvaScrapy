@@ -32,6 +32,10 @@ pyenv install 3.6.5
 pyenv global 3.6.5
 ```
 
+```
+CFLAGS="-I$(xcrun --show-sdk-path)/usr/include" pyenv install 3.7.3
+```
+
 创建项目
 
 ```shell

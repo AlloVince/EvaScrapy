@@ -19,6 +19,16 @@ logger = logging.getLogger(__name__)
 urllib3.Timeout.DEFAULT_TIMEOUT = 5.0
 
 
+# fix ValueError: Timeout value connect was <object object at 0x10db3a280>, but it must be an int, float or None.
+def from_float(timeout):
+    return urllib3.Timeout(read=3, connect=3)
+
+
+urllib3.Timeout.from_float = from_float
+
+
+# fix ValueError: Timeout value connect was <object object at xxx>, but it must be an int, float or None.
+
 class LocalFilePipeline(object):
     def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
@@ -42,7 +52,7 @@ class AliyunOssPipeline(object):
             return self._oss_bucket
 
         auth = oss2.Auth(settings['OSS_ACCESS_KEY_ID'], settings['OSS_ACCESS_KEY_SECRET'])
-        self._oss_bucket = oss2.Bucket(auth, settings['OSS_ENDPOINT'], settings['OSS_BUCKET'])
+        self._oss_bucket = oss2.Bucket(auth, settings['OSS_ENDPOINT'], settings['OSS_BUCKET'], connect_timeout=3.0)
         return self._oss_bucket
 
     def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:

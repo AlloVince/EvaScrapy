@@ -1,4 +1,4 @@
-FROM python:alpine3.6
+FROM python:alpine3.7
 
 #ADD debian.sources.list    /etc/apt/sources.list
 #RUN echo "deb-src http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list
