@@ -1,7 +1,7 @@
 -e git+https://github.com/AlloVince/aliyun-mns.git@master#egg=aliyun-mns
 
 
-Scrapy===1.6.0
+Scrapy===2.6.2
 Scrapy-Redis==0.6.8
 scrapy-fake-useragent==1.1.0
 redis===3.0.1
