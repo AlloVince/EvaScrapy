@@ -4,7 +4,7 @@
 Scrapy===1.6.0
 Scrapy-Redis==0.6.8
 scrapy-fake-useragent==1.1.0
-redis===3.0.1
+redis===4.5.3
 python-dotenv===0.10.3
 oss2===2.7.0
 apscheduler===3.6.0
