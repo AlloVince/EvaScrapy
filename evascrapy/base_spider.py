@@ -8,13 +8,17 @@ from scrapy_redis.spiders import RedisCrawlSpider
 from evascrapy.items import RawHtmlItem, TorrentFileItem
 
 
-class BaseSpider(RedisCrawlSpider if os.getenv('APP_DISTRIBUTED') else CrawlSpider):
+def _env_flag(name):
+    return os.getenv(name, '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+class BaseSpider(RedisCrawlSpider if _env_flag('APP_DISTRIBUTED') else CrawlSpider):
     deep_start_urls = None
     deep_rules = None
     deep_allowed_domains = None
 
     def __init__(self, *a, **kw):
-        if os.getenv('APP_RUN_DEEP'):
+        if _env_flag('APP_RUN_DEEP'):
             if hasattr(self, 'deep_start_urls'):
                 self.start_urls = self.deep_start_urls or self.start_urls
             if hasattr(self, 'deep_rules'):

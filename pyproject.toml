@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "evascrapy"
+version = "0.1.0"
+description = "A distributed crawler infrastructure based on Scrapy"
+requires-python = ">=3.14"
+dependencies = [
+    "Scrapy>=2.13",
+    "scrapy-redis>=0.9",
+    "redis>=5.0",
+    "python-dotenv>=1.0",
+    "apscheduler>=3.10",
+    "bencode.py>=4.0",
+    "elasticsearch>=8.0",
+    "aliyun-mns",
+    "oss2>=2.18",
+    "minio>=7.2",
+    "kafka-python>=2.0",
+    "nats-py>=2.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["evascrapy"]

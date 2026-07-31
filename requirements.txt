@@ -1,16 +1,14 @@
--e git+https://github.com/AlloVince/aliyun-mns.git@master#egg=aliyun-mns
+Scrapy>=2.13
+scrapy-redis>=0.9
+redis>=5.0
+python-dotenv>=1.0
+apscheduler>=3.10
+bencode.py>=4.0
+elasticsearch>=8.0
 
-
-Scrapy===1.6.0
-Scrapy-Redis==0.6.8
-scrapy-fake-useragent==1.1.0
-redis===3.0.1
-python-dotenv===0.10.3
-oss2===2.7.0
-apscheduler===3.6.0
-minio===4.0.18
-bencode.py===2.1.0
-pytz===2019.1
-kafka-python===1.4.6
-cfscrape===2.0.7
-elasticsearch===7.0.2
+# Optional integrations
+aliyun-mns
+oss2>=2.18
+minio>=7.2
+kafka-python>=2.0
+nats-py>=2.7

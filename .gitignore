@@ -64,3 +64,4 @@ evascrapy/spiders/*_spider.py
 node_modules
 src
 .DS_Store
+.venv

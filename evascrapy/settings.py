@@ -6,6 +6,11 @@ import os
 from scrapy.settings import default_settings
 from scrapy_redis import defaults
 
+
+def _as_bool(value):
+    return value if isinstance(value, bool) else str(value).strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 load_dotenv(dotenv_path=os.path.dirname(os.path.realpath(__file__)) + '/../.env')
 
 # LOG_LEVEL = logging.INFO
@@ -69,8 +74,6 @@ SPIDER_MODULES = ['evascrapy.spiders']
 NEWSPIDER_MODULE = 'evascrapy.spiders'
 
 COOKIES_GLOBAL = None
-
-ANTI_CLOUDFLARE = None
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'evascrapy (+http://www.yourdomain.com)'
@@ -154,6 +157,11 @@ for k, v in dict(os.environ).items():
     if k.isupper() and (k in globals() or k in vars(default_settings) or k in vars(defaults)):
         globals()[k] = os.getenv(k, v)
 
+for name in ('APP_RUN_DEEP', 'APP_MQ_NOTIFY_KAFKA', 'APP_MQ_NOTIFY_MNS',
+             'APP_DISTRIBUTED', 'APP_RANDOM_UA', 'TORRENT_FILE_ELASTIC_DUPE',
+             'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE'):
+    globals()[name] = _as_bool(globals()[name])
+
 if COOKIES_GLOBAL:
     DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.cookies.CookiesMiddleware'] = None
     DOWNLOADER_MIDDLEWARES['evascrapy.middlewares.GlobalCookiesMiddleware'] = 700
@@ -161,9 +169,6 @@ if COOKIES_GLOBAL:
 if APP_RANDOM_UA:
     DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.useragent.UserAgentMiddleware'] = None
     DOWNLOADER_MIDDLEWARES['scrapy_fake_useragent.middleware.RandomUserAgentMiddleware'] = 400
-
-if ANTI_CLOUDFLARE:
-    DOWNLOADER_MIDDLEWARES['evascrapy.middlewares.CloudFlareMiddleware'] = 560
 
 if APP_STORAGE == 'file':
     ITEM_PIPELINES['evascrapy.pipelines.LocalFilePipeline'] = 300

@@ -10,30 +10,22 @@ from mns.account import Account
 from mns.queue import Message
 from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem
 import logging
-import urllib3
 from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
-# default timeout for minio
-urllib3.Timeout.DEFAULT_TIMEOUT = 5.0
-
-
-# fix ValueError: Timeout value connect was <object object at 0x10db3a280>, but it must be an int, float or None.
-def from_float(timeout):
-    return urllib3.Timeout(read=3, connect=3)
-
-
-urllib3.Timeout.from_float = from_float
-
-
-# fix ValueError: Timeout value connect was <object object at xxx>, but it must be an int, float or None.
-
 class LocalFilePipeline(object):
-    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
+    @classmethod
+    def from_crawler(cls, crawler):
+        pipeline = cls()
+        pipeline.crawler = crawler
+        return pipeline
+
+    def process_item(self, item: QueueBasedItem) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
+        spider = self.crawler.spider
         filepath = item.to_filepath(spider)
         pathlib.Path(os.path.dirname(filepath)).mkdir(parents=True, exist_ok=True)
         mode = 'w+' if isinstance(item, RawTextItem) else 'wb+'
@@ -182,10 +174,9 @@ class ElasticDupePipeline(object):
         url = urlparse(settings['TORRENT_FILE_ELASTIC_DUPE_URL'])
         http_auth = (url.username, url.password) if url.username and url.password else None
         self._es = Elasticsearch(
-            url.hostname,
-            http_auth=http_auth,
-            scheme=url.scheme,
-            port=url.port, )
+            url.geturl(),
+            basic_auth=http_auth,
+        )
 
         return self._es
 
@@ -195,7 +186,6 @@ class ElasticDupePipeline(object):
 
         if self.get_elastic(spider.settings).exists(
                 index=spider.settings['TORRENT_FILE_ELASTIC_DUPE_INDICE'],
-                doc_type=spider.settings['TORRENT_FILE_ELASTIC_DUPE_DOCTYPE'],
                 id=item.get_info_hash(),
         ):
             logger.info('Torrent item %s ignored by pipelines.ElasticDupePipeline', item.get_info_hash())
