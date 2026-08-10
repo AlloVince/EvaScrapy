@@ -1,14 +1,22 @@
-FROM python:alpine3.7
+FROM python:3.14-alpine
 
-#ADD debian.sources.list    /etc/apt/sources.list
-#RUN echo "deb-src http://security.debian.org/ jessie/updates main contrib non-free" >> /etc/apt/sources.list
-RUN apk add --no-cache openssl-dev libffi-dev make gcc musl-dev libxml2-dev libxslt-dev git nodejs tzdata
-#RUN mkdir -p ~/.pip && echo "[global]\nindex-url = http://mirrors.aliyun.com/pypi/simple/\n[install]\ntrusted-host = mirrors.aliyun.com" > ~/.pip/pip.conf
+RUN apk add --no-cache \
+    openssl-dev \
+    libffi-dev \
+    make \
+    gcc \
+    musl-dev \
+    libxml2-dev \
+    libxslt-dev \
+    git \
+    tzdata
+
 ENV TZ Asia/Shanghai
 
-COPY . /opt/htdocs/evascrapy
 WORKDIR /opt/htdocs/evascrapy
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
 EXPOSE 6000
 CMD python start.py

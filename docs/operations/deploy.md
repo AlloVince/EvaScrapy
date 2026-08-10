@@ -6,7 +6,7 @@
 ## 内容
 
 ### Docker
-- `Dockerfile`：`FROM python:alpine3.7`，WORKDIR `/opt/htdocs/evascrapy`，`CMD python start.py`，EXPOSE 6000
+- `Dockerfile`：`FROM python:3.14-alpine`，WORKDIR `/opt/htdocs/evascrapy`，`CMD python start.py`，EXPOSE 6000
 - 镜像名（CI）：`allovince/evascrapy`（staging / latest / tag）
 - **待确认：** 基镜像与 requires-python>=3.14 不一致，生产是否已有其它 Dockerfile/流水线
 

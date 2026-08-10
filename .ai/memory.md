@@ -30,7 +30,6 @@
 ## 待验证
 - `nats-py` 在依赖中但源码未见引用，是否预留或遗留 — Assumed
 - 生产是否仍用 `nyaa` 示例 spider，或仅作模板 — Assumed
-- Docker 基镜像 `python:alpine3.7` 与 requires-python>=3.14 严重偏差，是否计划重做镜像 — Assumed
 - 用户偏好「Python 最新 LTS」与仓库 `.python-version`/`pyproject` 的 3.14 是否已对齐为团队标准 — Assumed（本次按用户指示以最新 LTS 为偏好写入 setup）
 
 ## 协作偏好（项目级）
