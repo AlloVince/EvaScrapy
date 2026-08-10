@@ -14,8 +14,8 @@ RUN apk add --no-cache \
 ENV TZ Asia/Shanghai
 
 WORKDIR /opt/htdocs/evascrapy
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml .
+RUN pip install --no-cache-dir .
 COPY . .
 
 EXPOSE 6000

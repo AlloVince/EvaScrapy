@@ -12,11 +12,10 @@
 
 ### 安装
 ```bash
-uv venv
+uv sync
 source .venv/bin/activate
-uv pip install -r requirements.txt
 # 开发可选
-uv pip install -e ".[dev]"
+uv sync --extra dev
 ```
 
 ### 配置

@@ -45,7 +45,7 @@ wget https://github.com/AlloVince/EvaScrapy/archive/master.tar.gz -O master.tar.
 安装项目依赖
 
 ```
-pip install -r requirements.txt
+uv sync
 ```
 
 ## 项目运行
