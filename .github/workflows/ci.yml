@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
 env:
   DOCKER_IMAGE: allovince/evascrapy
 
@@ -14,15 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.14"
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt pytest
+        run: uv pip install --system -r requirements.txt pytest
       - name: Run tests
-        run: pytest tests/
+        run: uv run pytest tests/
 
   release:
     needs: test
@@ -30,32 +33,22 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-      - name: Install dependencies
-        run: pip install python-semantic-release
-      - name: Semantic Release
-        id: release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref_name }}
+      - name: Force release branch to be at workflow sha
         run: |
-          # Dry-run: check if a new version would be produced
-          next_version=$(semantic-release version --print 2>/dev/null || true)
-          if [ -z "$next_version" ]; then
-            echo "No new version to release"
-            echo "released=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "Next version: $next_version"
-            semantic-release version
-            echo "released=true" >> "$GITHUB_OUTPUT"
-            echo "tag=v$next_version" >> "$GITHUB_OUTPUT"
-          fi
+          git reset --hard ${{ github.sha }}
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v10.6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: "github-actions"
+          git_committer_email: "actions@users.noreply.github.com"
+          vcs_release: false
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to Docker Hub

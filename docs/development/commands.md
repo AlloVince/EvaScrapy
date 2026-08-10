@@ -7,28 +7,28 @@
 
 ### 调度进程（增量周期）
 ```bash
-python start.py
+uv run python start.py
 # APP_SPIDER 默认 demo；可用 env 覆盖
-APP_SPIDER=nyaa python start.py
+APP_SPIDER=nyaa uv run python start.py
 ```
 
 ### 一次性 crawl
 ```bash
-scrapy crawl <spider_name>
-APP_TASK=full APP_RUN_DEEP=1 scrapy crawl <spider_name>
+uv run scrapy crawl <spider_name>
+APP_TASK=full APP_RUN_DEEP=1 uv run scrapy crawl <spider_name>
 ```
 
 ### 分布式
 ```bash
 redis-cli sadd <name>:start_urls <url>
-APP_DISTRIBUTED=1 scrapy crawl <name>
+APP_DISTRIBUTED=1 uv run scrapy crawl <name>
 # 清理
 redis-cli KEYS "<name>:*" | xargs redis-cli DEL
 ```
 
 ### 测试
 ```bash
-pytest tests/
+uv run pytest tests/
 ```
 
 ### Docker（镜像名以仓库/CI 为准）

@@ -20,6 +20,7 @@
 - 配置优先级：环境变量 > `.env` > `settings.py` > scrapy 默认；settings 用 `os.getenv` 覆盖已在 globals 或 scrapy/scrapy-redis 默认名中的大写键（Confirmed）
 - README 仍写 Python 3.6 / 旧变量名（如 `APP_MQ_NOTIFY`）；以 `settings.py` 与 `pyproject.toml` 为准（Confirmed）
 - `.env` 与密钥不入库；文档与日志禁止粘贴密钥原文（Confirmed）
+- **Python 指令必须用 `uv`**：CI 用 `astral-sh/setup-uv` action + `uv pip install --system`，本地用 `uv run` / `uv pip install`，Dockerfile 内可用 `pip`（无 uv）。禁止直接用 `pip install` / `pytest` 等裸命令（Confirmed）
 
 ## 调试手册
 - 分布式空闲即退：`BaseSpider.spider_idle` 会 close；需先 `redis sadd <name>:start_urls ...` 再 `APP_DISTRIBUTED=1 scrapy crawl <name>`

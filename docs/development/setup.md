@@ -12,11 +12,11 @@
 
 ### 安装
 ```bash
-python -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 # 开发可选
-pip install -e ".[dev]"   # 若用 pyproject optional dev
+uv pip install -e ".[dev]"
 ```
 
 ### 配置
@@ -26,9 +26,9 @@ pip install -e ".[dev]"   # 若用 pyproject optional dev
 
 ### 校验
 ```bash
-pytest tests/
+uv run pytest tests/
 # 或
-scrapy list
+uv run scrapy list
 ```
 
 ### 注意
