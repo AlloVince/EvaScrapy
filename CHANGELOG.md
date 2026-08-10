@@ -2,6 +2,24 @@
 
 <!-- version list -->
 
+## v2.1.0 (2026-08-10)
+
+### Chores
+
+- Remove requirements.txt, migrate to pyproject.toml
+  ([`055be09`](https://github.com/AlloVince/EvaScrapy/commit/055be09e1e17a6371d0493c413185469045b24f7))
+
+### Documentation
+
+- Memory
+  ([`388e2de`](https://github.com/AlloVince/EvaScrapy/commit/388e2de636919affce9aa6c35d65db51b938ce29))
+
+### Features
+
+- Add nats
+  ([`2c5e25d`](https://github.com/AlloVince/EvaScrapy/commit/2c5e25d3df8ec247a69ed979bcb3c01de2c0e112))
+
+
 ## v2.0.1 (2026-08-10)
 
 ### Bug Fixes
