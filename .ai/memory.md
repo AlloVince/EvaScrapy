@@ -9,6 +9,9 @@
 
 ## 当前焦点
 - 进行中：无（bootstrap standard 已完成）
+- CI 已迁移至 GitHub Actions（`.github/workflows/ci.yml`），使用 `python-semantic-release`，不创建 GitHub Release
+- 旧 CI 文件（`.drone.yml`、`.travis.yml`、`Makefile`）已删除
+- `package.json` 已清理 npm semantic-release 依赖
 - 下一步：按业务任务开工；首扫遗留待确认见下节
 
 ## 雷区与禁忌
@@ -25,7 +28,6 @@
 - Pipeline 未生效：查 `APP_STORAGE`、`APP_MQ_NOTIFY_*`、`TORRENT_FILE_ELASTIC_DUPE`、`APP_DISTRIBUTED` 是否在 settings 装配分支打开
 
 ## 待验证
-- CI 主用 Drone 还是 Travis（两者配置均在；Drone 镜像仍 python:3.6，与本地 3.14 目标不一致）— Assumed
 - `nats-py` 在依赖中但源码未见引用，是否预留或遗留 — Assumed
 - 生产是否仍用 `nyaa` 示例 spider，或仅作模板 — Assumed
 - Docker 基镜像 `python:alpine3.7` 与 requires-python>=3.14 严重偏差，是否计划重做镜像 — Assumed

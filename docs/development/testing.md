@@ -8,7 +8,7 @@
 - 目录：`tests/`
 - 现状：`tests/test_pipelines.py` 仅测 `url_to_filepath`（items 辅助函数）
 - 本地：`pytest tests/`
-- CI：`.drone.yml` / `.travis.yml` 在 master push 跑 `pytest tests/`（镜像 Python 版本偏旧，待对齐）
+- CI：`.github/workflows/ci.yml` 在 main push 跑 `pytest tests/`
 
 ### 惯例建议
 - 改 items 路径/序列化 → 单测纯函数

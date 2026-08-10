@@ -39,7 +39,6 @@ docker run -e "APP_TASK=full" -e "APP_SPIDER=your_spider" \
 ```
 
 ### 其它
-- `make drone-build-log` — CI 写构建信息
 - 配置优先级：环境变量 > `.env` > settings.py > scrapy 默认
 
 ## 相关
