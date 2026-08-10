@@ -8,11 +8,8 @@
 更新：2026-08-10
 
 ## 当前焦点
-- 进行中：无（bootstrap standard 已完成）
-- CI 已迁移至 GitHub Actions（`.github/workflows/ci.yml`），使用 `python-semantic-release`，不创建 GitHub Release
-- 旧 CI 文件（`.drone.yml`、`.travis.yml`、`Makefile`）已删除
-- `package.json` 已清理 npm semantic-release 依赖
-- 下一步：按业务任务开工；首扫遗留待确认见下节
+- 进行中：无（CI 迁移已完成并实战验证 ✅）
+- 下一步：按业务任务开工
 
 ## 雷区与禁忌
 - `evascrapy/spiders/*_spider.py` 被 `.gitignore` 忽略；新增业务 spider 默认不进 git，需有意调整 ignore 或改命名约定（Confirmed）
@@ -20,7 +17,7 @@
 - 配置优先级：环境变量 > `.env` > `settings.py` > scrapy 默认；settings 用 `os.getenv` 覆盖已在 globals 或 scrapy/scrapy-redis 默认名中的大写键（Confirmed）
 - README 仍写 Python 3.6 / 旧变量名（如 `APP_MQ_NOTIFY`）；以 `settings.py` 与 `pyproject.toml` 为准（Confirmed）
 - `.env` 与密钥不入库；文档与日志禁止粘贴密钥原文（Confirmed）
-- **Python 指令必须用 `uv`**：CI 用 `astral-sh/setup-uv` action + `uv pip install --system`，本地用 `uv run` / `uv pip install`，Dockerfile 内可用 `pip`（无 uv）。禁止直接用 `pip install` / `pytest` 等裸命令（Confirmed）
+- **Python 指令必须用 `uv`**：CI 用 `astral-sh/setup-uv` action + `uv sync`，本地用 `uv run` / `uv sync`，Dockerfile 内可用 `pip`（无 uv）。禁止直接用 `pip install` / `pytest` 等裸命令（Confirmed）
 
 ## 调试手册
 - 分布式空闲即退：`BaseSpider.spider_idle` 会 close；需先 `redis sadd <name>:start_urls ...` 再 `APP_DISTRIBUTED=1 scrapy crawl <name>`
