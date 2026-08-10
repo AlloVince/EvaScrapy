@@ -57,6 +57,9 @@ class QueueBasedItem(Item):
     def to_kafka_message(self, spider):
         pass
 
+    def to_nats_message(self, spider):
+        pass
+
     def get_meta(self):
         return None
 
@@ -82,6 +85,15 @@ class RawTextItem(QueueBasedItem):
             command_name='etl:%s' % spider.name,
             filepath=self.to_filepath(spider),
             queue_name=spider.settings['MNS_QUEUE_NAME'],
+            spider=spider,
+        )
+        return command
+
+    def to_nats_message(self, spider):
+        command = get_command(
+            command_name='etl:%s' % spider.name,
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['NATS_SUBJECT'],
             spider=spider,
         )
         return command
@@ -167,6 +179,15 @@ class BinaryFileItem(QueueBasedItem):
             spider=spider,
         )
         return bytes(command, encoding='utf8')
+
+    def to_nats_message(self, spider):
+        command = get_command(
+            command_name='etl:torrent',
+            filepath=self.to_filepath(spider),
+            queue_name=spider.settings['NATS_SUBJECT'],
+            spider=spider,
+        )
+        return command
 
 
 class TorrentFileItem(BinaryFileItem):

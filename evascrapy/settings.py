@@ -22,6 +22,7 @@ APP_RUN_DEEP = False
 APP_SPIDER = 'demo'
 APP_MQ_NOTIFY_KAFKA = False
 APP_MQ_NOTIFY_MNS = False
+APP_MQ_NOTIFY_NATS = False
 APP_TIMEZONE = 'Asia/Chongqing'
 APP_STORAGE = 'file'
 APP_STORAGE_DEPTH = 3
@@ -49,6 +50,12 @@ MNS_ACCOUNT_ENDPOINT = None
 MNS_ACCESSKEY_ID = None
 MNS_ACCESSKEY_SECRET = None
 MNS_QUEUE_NAME = None
+
+NATS_SERVER_LIST = ['nats://localhost:4222']
+NATS_SUBJECT = None
+NATS_CONNECT_TIMEOUT = 5
+NATS_ALLOW_RECONNECT = True
+NATS_MAX_RECONNECT_ATTEMPTS = 60
 
 KAFKA_SSL_ENABLE = False
 KAFKA_SSL_CERT_PATH = False
@@ -158,6 +165,7 @@ for k, v in dict(os.environ).items():
         globals()[k] = os.getenv(k, v)
 
 for name in ('APP_RUN_DEEP', 'APP_MQ_NOTIFY_KAFKA', 'APP_MQ_NOTIFY_MNS',
+             'APP_MQ_NOTIFY_NATS',
              'APP_DISTRIBUTED', 'APP_RANDOM_UA', 'TORRENT_FILE_ELASTIC_DUPE',
              'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE'):
     globals()[name] = _as_bool(globals()[name])
@@ -185,6 +193,9 @@ if APP_MQ_NOTIFY_KAFKA:
 
 if APP_MQ_NOTIFY_MNS:
     ITEM_PIPELINES['evascrapy.pipelines.AliyunMnsPipeline'] = 600
+
+if APP_MQ_NOTIFY_NATS:
+    ITEM_PIPELINES['evascrapy.pipelines.NatsPipeline'] = 600
 
 
 if APP_DISTRIBUTED:

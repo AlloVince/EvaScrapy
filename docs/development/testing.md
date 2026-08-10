@@ -6,7 +6,7 @@
 ## 内容
 - 框架：pytest
 - 目录：`tests/`
-- 现状：`tests/test_pipelines.py` 仅测 `url_to_filepath`（items 辅助函数）
+- 现状：`tests/test_pipelines.py` 共 38 用例，覆盖工具函数、item 序列化、所有 pipeline 逻辑（mock 外部 SDK）
 - 本地：`uv run pytest tests/`（或激活 venv 后 `pytest tests/`）
 - CI：`.github/workflows/ci.yml` 在 main push 用 `uv run pytest tests/`
 

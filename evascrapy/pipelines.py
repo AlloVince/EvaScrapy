@@ -2,12 +2,14 @@ import pathlib
 import oss2
 import ssl
 import os
+import asyncio
 from urllib.parse import urlparse
 from io import BytesIO
 from kafka import KafkaProducer
 from minio import Minio
 from mns.account import Account
 from mns.queue import Message
+from nats.aio.client import Client as NATS
 from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem
 import logging
 from elasticsearch import Elasticsearch
@@ -161,6 +163,42 @@ class AliyunMnsPipeline(object):
         msg = Message(item.to_mns_message(spider))
         future = self.get_producer(spider.settings)
         future.send_message(msg)
+        return item
+
+
+class NatsPipeline(object):
+    _nats_producer = None
+
+    def get_producer(self, settings):
+        if self._nats_producer:
+            return self._nats_producer
+
+        producer = NATS()
+        loop = asyncio.new_event_loop()
+
+        async def connect():
+            await producer.connect(
+                servers=settings['NATS_SERVER_LIST'],
+                connect_timeout=settings['NATS_CONNECT_TIMEOUT'],
+                allow_reconnect=settings['NATS_ALLOW_RECONNECT'],
+                max_reconnect_attempts=settings['NATS_MAX_RECONNECT_ATTEMPTS'],
+            )
+
+        loop.run_until_complete(connect())
+        self._nats_producer = (producer, loop)
+        return self._nats_producer
+
+    def process_item(self, item, spider) -> QueueBasedItem:
+        if not isinstance(item, QueueBasedItem):
+            return item
+
+        producer, loop = self.get_producer(spider.settings)
+        loop.run_until_complete(
+            producer.publish(
+                spider.settings['NATS_SUBJECT'],
+                item.to_nats_message(spider).encode(),
+            )
+        )
         return item
 
 

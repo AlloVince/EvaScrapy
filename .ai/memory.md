@@ -8,7 +8,7 @@
 更新：2026-08-10
 
 ## 当前焦点
-- 进行中：无（CI 迁移已完成并实战验证 ✅）
+- 进行中：无
 - 下一步：按业务任务开工
 
 ## 雷区与禁忌
@@ -23,10 +23,9 @@
 - 分布式空闲即退：`BaseSpider.spider_idle` 会 close；需先 `redis sadd <name>:start_urls ...` 再 `APP_DISTRIBUTED=1 scrapy crawl <name>`
 - 调度跳过新一轮：`runner` 若已有 crawler 在跑则 SKIPPED；查日志 `NEW ROUND SKIPPED`
 - 存储路径对不上：检查 `APP_TASK` / `APP_STORAGE_SHUFFLE_INTERVAL` 与 spider.name
-- Pipeline 未生效：查 `APP_STORAGE`、`APP_MQ_NOTIFY_*`、`TORRENT_FILE_ELASTIC_DUPE`、`APP_DISTRIBUTED` 是否在 settings 装配分支打开
+- Pipeline 未生效：查 `APP_STORAGE`、`APP_MQ_NOTIFY_*`（KAFKA/MNS/NATS）、`TORRENT_FILE_ELASTIC_DUPE`、`APP_DISTRIBUTED` 是否在 settings 装配分支打开
 
 ## 待验证
-- `nats-py` 在依赖中但源码未见引用，是否预留或遗留 — Assumed
 - 生产是否仍用 `nyaa` 示例 spider，或仅作模板 — Assumed
 - 用户偏好「Python 最新 LTS」与仓库 `.python-version`/`pyproject` 的 3.14 是否已对齐为团队标准 — Assumed（本次按用户指示以最新 LTS 为偏好写入 setup）
 
