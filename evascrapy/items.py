@@ -125,7 +125,7 @@ class RawJsonItem(RawTextItem):
             'task': self['task'],
             'timestamp': self['timestamp'],
             'content': self['content'],
-        })
+        }, ensure_ascii=False, indent=2)
 
 
 class RawHtmlItem(RawTextItem):

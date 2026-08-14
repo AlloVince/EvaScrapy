@@ -136,6 +136,20 @@ class TestRawJsonItem:
         assert 'RawJsonItem' in repr(item)
         assert 'example.com' in repr(item)
 
+    def test_to_string_keeps_unicode_readable(self):
+        item = RawJsonItem(
+            url='https://example.com/data.json',
+            version='1.0',
+            task='test_task',
+            timestamp=1234567890,
+            content={'title': 'いい作品'},
+        )
+
+        serialized = item.to_string()
+
+        assert 'いい作品' in serialized
+        assert '\\u3044' not in serialized
+
 
 class TestRawHtmlItem:
     @pytest.fixture
