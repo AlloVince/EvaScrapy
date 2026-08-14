@@ -36,7 +36,6 @@ packages = ["evascrapy"]
 version_variable = "pyproject.toml:project.version"
 version_toml = ["pyproject.toml:project.version"]
 branch = "main"
-upload_to_release = false
 upload_to_pypi = false
 build_command = ""
 commit_subject = "chore(release): {version}"

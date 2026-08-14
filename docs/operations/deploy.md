@@ -21,12 +21,12 @@ docker run -e APP_TASK=full -e APP_SPIDER=your_spider \
 | 文件 | 作用 |
 |---|---|
 | `.github/workflows/ci.yml` | main push/PR：单测；main push：semantic-release + Docker 镜像 |
-| `pyproject.toml` | `[tool.semantic_release]` 配置语义化发布（不创建 GitHub Release） |
+| `pyproject.toml` | `[tool.semantic_release]` 配置语义化发布 |
 
 ### 发布
 - `python-semantic-release` 根据 Conventional Commits 自动 bump 版本、打 tag
+- CI 会为每个版本 tag 创建或更新对应的 GitHub Release
 - Docker tag：`staging`（每次 main push）、`latest` + `vX.Y.Z`（有版本发布时）
-- 不创建 GitHub Release
 
 ## 相关
 - `Dockerfile`、`.drone.yml`、`config.md`
