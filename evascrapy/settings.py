@@ -11,6 +11,17 @@ def _as_bool(value):
     return value if isinstance(value, bool) else str(value).strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
+def _normalize_log_format(value):
+    """Keep the legacy ``LOG_FORMAT=json`` value usable.
+
+    EvaScrapy does not provide a JSON logging formatter, and passing ``json``
+    to ``logging.Formatter`` makes Scrapy fail during startup.
+    """
+    if isinstance(value, str) and value.strip().lower() == 'json':
+        return default_settings.LOG_FORMAT
+    return value
+
+
 load_dotenv(dotenv_path=os.path.dirname(os.path.realpath(__file__)) + '/../.env')
 
 # LOG_LEVEL = logging.INFO
@@ -76,6 +87,7 @@ AWS_S3_DEFAULT_BUCKET = ''
 
 # SCRAPY SETTINGS
 BOT_NAME = 'evascrapy'
+LOG_FORMAT = default_settings.LOG_FORMAT
 
 SPIDER_MODULES = ['evascrapy.spiders']
 NEWSPIDER_MODULE = 'evascrapy.spiders'
@@ -163,6 +175,8 @@ LOG_FORMATTER = 'evascrapy.logformatter.LogFormatter'
 for k, v in dict(os.environ).items():
     if k.isupper() and (k in globals() or k in vars(default_settings) or k in vars(defaults)):
         globals()[k] = os.getenv(k, v)
+
+LOG_FORMAT = _normalize_log_format(LOG_FORMAT)
 
 for name in ('APP_RUN_DEEP', 'APP_MQ_NOTIFY_KAFKA', 'APP_MQ_NOTIFY_MNS',
              'APP_MQ_NOTIFY_NATS',
