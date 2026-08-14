@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.2 (2026-08-14)
+
+### Bug Fixes
+
+- **ci**: Create GitHub releases
+  ([`7c5c3c4`](https://github.com/AlloVince/EvaScrapy/commit/7c5c3c4b71bb15bc48dd05f667bab6ad86734e46))
+
+
 ## v2.1.1 (2026-08-14)
 
 ### Bug Fixes
