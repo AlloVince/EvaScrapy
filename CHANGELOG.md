@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v2.1.1 (2026-08-14)
+
+### Bug Fixes
+
+- For cookies
+  ([`7e4b472`](https://github.com/AlloVince/EvaScrapy/commit/7e4b472eb895ef358af97793318e28e1554613bf))
+
+### Documentation
+
+- New
+  ([`77291df`](https://github.com/AlloVince/EvaScrapy/commit/77291df4d9a663b118e8241bf0cab098535a6d24))
+
+
 ## v2.1.0 (2026-08-10)
 
 ### Chores
