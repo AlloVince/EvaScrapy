@@ -39,4 +39,4 @@ class GlobalCookiesMiddleware(CookiesMiddleware):
 
         request.headers.pop('Cookie', None)
         jar.add_cookie_header(request)
-        self._debug_cookie(request, spider)
+        self._debug_cookie(request)

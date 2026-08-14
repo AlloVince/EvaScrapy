@@ -91,8 +91,6 @@ docker run -e APP_TASK=full -e APP_SPIDER=your_spider \
 - 调度入口用 `APP_SPIDER={name}`（不含 `_spider` 后缀）
 - 注意：`.gitignore` 默认忽略 `evascrapy/spiders/*_spider.py`（业务 spider 通常不入库）
 
-仓库内示例：`nyaa_spider.py`。
-
 ## Item 与存储
 
 Item 族见 `evascrapy/items.py`，常用：
