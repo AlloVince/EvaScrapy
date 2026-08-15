@@ -4,7 +4,7 @@
 改存储后端、MQ 通知、torrent ES 去重。
 
 ## 内容
-**职责：** 消费 `QueueBasedItem`；写入存储或发送通知；可选丢弃重复 torrent。
+**职责：** 消费 `QueueBasedItem`；写入存储或发送通知；可选丢弃重复 torrent。请求入队前的 S3 去重见 `components/dupefilters/README.md`。
 
 **边界：** 不解析页面；非 QueueBasedItem 直接透传。
 

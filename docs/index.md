@@ -13,6 +13,7 @@
 | Cookie / UA 中间件 | `components/middlewares/README.md` |
 | 周期调度入口 | `components/runner/README.md` |
 | 日志格式 | `components/logformatter/README.md` |
+| 请求去重 | `components/dupefilters/README.md` |
 | 通用 Spider 接入约定 | `components/spiders/README.md` |
 | 装环境 | `development/setup.md` |
 | 常用命令 | `development/commands.md` |

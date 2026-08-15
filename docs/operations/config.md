@@ -22,6 +22,9 @@
 | APP_CRAWL_INTERVAL | 调度间隔枚举 | weekly |
 | APP_STORAGE_SHUFFLE_INTERVAL | APP_TASK 时间桶 | monthly |
 | APP_RANDOM_UA | 随机 UA | False |
+| S3_DUPEFILTER_ENABLED | 是否执行 S3/SeaweedFS 对象存在检查 | False |
+| S3_DUPEFILTER_ROOT_PATH | S3 去重对象稳定根路径 | None（启用时必填） |
+| S3_DUPEFILTER_DEPTH | S3 去重 MD5 分片深度 | None（回退 APP_STORAGE_DEPTH） |
 | COOKIES_GLOBAL | 全局 Cookie 串 | None |
 | REDIS_URL | 分布式 Redis | redis://docker.for.mac.host.localhost:6379 |
 | LOG_LEVEL | start.py 日志级别 | DEBUG（start 内） |
@@ -39,6 +42,14 @@
 
 ### OSS / S3 / Kafka / MNS
 见 `settings.py` 中 `OSS_*`、`AWS_S3_*`、`KAFKA_*`、`MNS_*`。凭据仅经环境注入。
+
+启用 S3DupeFilter 还需显式设置：
+
+```ini
+DUPEFILTER_CLASS=evascrapy.dupefilters.S3DupeFilter
+```
+
+不配置 `DUPEFILTER_CLASS` 时保持 Scrapy 官方 `RFPDupeFilter`，不会执行 S3 去重。
 
 ### 与 README 差异（以代码为准）
 - README `APP_MQ_NOTIFY` → 代码为 `APP_MQ_NOTIFY_KAFKA` / `APP_MQ_NOTIFY_MNS`

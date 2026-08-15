@@ -43,6 +43,12 @@ APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 APP_RANDOM_UA = False
 
+# Optional cross-run request dedupe. DUPEFILTER_CLASS is intentionally not
+# configured here; Scrapy's official RFPDupeFilter remains the default.
+S3_DUPEFILTER_ENABLED = False
+S3_DUPEFILTER_ROOT_PATH = None
+S3_DUPEFILTER_DEPTH = None
+
 TORRENT_FILE_PIPELINE_ROOT_PATH = 'dl/info_hash'
 TORRENT_FILE_PIPELINE_DEPTH = 3
 
@@ -181,7 +187,7 @@ LOG_FORMAT = _normalize_log_format(LOG_FORMAT)
 for name in ('APP_RUN_DEEP', 'APP_MQ_NOTIFY_KAFKA', 'APP_MQ_NOTIFY_MNS',
              'APP_MQ_NOTIFY_NATS',
              'APP_DISTRIBUTED', 'APP_RANDOM_UA', 'TORRENT_FILE_ELASTIC_DUPE',
-             'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE'):
+             'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE', 'S3_DUPEFILTER_ENABLED'):
     globals()[name] = _as_bool(globals()[name])
 
 if COOKIES_GLOBAL:
