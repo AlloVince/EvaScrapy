@@ -4,7 +4,7 @@
 改 Scrapy 爬取/抓取/丢弃日志格式。
 
 ## 内容
-**职责：** 自定义 `LOG_FORMATTER`：crawled/scraped/dropped 消息模板与级别（scraped 为 DEBUG）。
+**职责：** 自定义 `LOG_FORMATTER`：crawled/scraped/dropped 消息模板与级别（scraped 为 DEBUG）。`crawled` 优先显示请求 `meta['log_context']`，没有上下文时回退为 Scrapy request 表示。
 
 **边界：** 非业务日志；非 metrics。
 

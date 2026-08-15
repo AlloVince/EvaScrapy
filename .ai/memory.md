@@ -12,7 +12,7 @@
 - 下一步：按业务任务开工
 
 ## 雷区与禁忌
-- 具体网站 Spider 的正式版本及站点经验归属每次开工时经用户确认的业务项目；先扫描 EvaScrapy 同级的 `*.crawler` 候选，即使只有一个也必须确认。业务 Spider 可作为 gitignore 的本地调试副本保留；用户发送 `.ai/workflow/end.md` 时复制改动到已确认的业务项目，本地副本不删除（Confirmed）
+- 具体网站 Spider 的正式版本及站点经验归属每次开工时经用户确认的业务项目；先扫描 EvaScrapy 同级的 `*.crawler` 候选，即使只有一个也必须确认。业务 Spider 日常优先在 EvaScrapy 内的 gitignore 本地调试副本修改；用户发送 `.ai/workflow/end.md` 时才复制改动到已确认的业务项目，同步后不删除或移动本地副本（Confirmed）
 - `evascrapy/spiders/*_spider.py` 被 `.gitignore` 忽略；新增业务 spider 默认不进 git，需有意调整 ignore 或改命名约定（Confirmed）
 - `BaseSpider` 基类按**进程启动时** `APP_DISTRIBUTED` 环境变量在 import 时选择 `RedisCrawlSpider` vs `CrawlSpider`；改 env 后需重启进程，不能只靠 settings 热切换（Confirmed）
 - 配置优先级：环境变量 > `.env` > `settings.py` > scrapy 默认；settings 用 `os.getenv` 覆盖已在 globals 或 scrapy/scrapy-redis 默认名中的大写键（Confirmed）
