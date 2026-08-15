@@ -65,6 +65,12 @@ class AliyunOssPipeline(object):
 class AwsS3Pipeline(object):
     _client = None
 
+    @classmethod
+    def from_crawler(cls, crawler):
+        pipeline = cls()
+        pipeline.crawler = crawler
+        return pipeline
+
     def get_client(self, settings) -> Minio:
         if self._client:
             return self._client
@@ -79,10 +85,11 @@ class AwsS3Pipeline(object):
         self._client = client
         return client
 
-    def process_item(self, item: QueueBasedItem, spider) -> QueueBasedItem:
+    def process_item(self, item: QueueBasedItem) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
+        spider = self.crawler.spider
         content = BytesIO(item.to_string().encode()) if isinstance(item, RawTextItem) else BytesIO(item.to_bytes())
         self.get_client(
             spider.settings

@@ -20,6 +20,9 @@
 - `.env` 与密钥不入库；文档与日志禁止粘贴密钥原文（Confirmed）
 - **Python 指令必须用 `uv`**：CI 用 `astral-sh/setup-uv` action + `uv sync`，本地用 `uv run` / `uv sync`，Dockerfile 内可用 `pip`（无 uv）。禁止直接用 `pip install` / `pytest` 等裸命令（Confirmed）
 
+## Spider 开发源规则
+- 具体网站 Spider 必须以 EvaScrapy 内的 gitignore 本地调试副本为唯一开发源，修改、调试和测试只能在本项目内进行，本项目副本始终保持最新。只有用户明确启动或发送 `.ai/workflow/end.md` 时才同步到已确认的业务项目，未明确启动前禁止同步；同步后不删除或移动本地副本（Confirmed）
+
 ## 调试手册
 - 分布式空闲即退：`BaseSpider.spider_idle` 会 close；需先 `redis sadd <name>:start_urls ...` 再 `APP_DISTRIBUTED=1 scrapy crawl <name>`
 - 调度跳过新一轮：`runner` 若已有 crawler 在跑则 SKIPPED；查日志 `NEW ROUND SKIPPED`

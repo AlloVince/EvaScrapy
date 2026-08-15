@@ -441,8 +441,10 @@ class TestAliyunMnsPipeline:
 
 class TestAwsS3Pipeline:
     @pytest.fixture
-    def pipeline(self):
-        return AwsS3Pipeline()
+    def pipeline(self, spider):
+        pipeline = AwsS3Pipeline()
+        pipeline.crawler = MagicMock(spider=spider)
+        return pipeline
 
     @pytest.fixture
     def spider(self):
@@ -462,7 +464,7 @@ class TestAwsS3Pipeline:
         return spider
 
     def test_passthrough_non_queue_item(self, pipeline, spider):
-        result = pipeline.process_item("not_an_item", spider)
+        result = pipeline.process_item("not_an_item")
         assert result == "not_an_item"
 
     @patch('evascrapy.pipelines.Minio')
@@ -478,7 +480,7 @@ class TestAwsS3Pipeline:
         mock_client = MagicMock()
         mock_minio_class.return_value = mock_client
 
-        result = pipeline.process_item(item, spider)
+        result = pipeline.process_item(item)
 
         assert result is item
         mock_client.put_object.assert_called_once()
