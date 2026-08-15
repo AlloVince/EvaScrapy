@@ -3,6 +3,7 @@ import logging
 
 from twisted.python.failure import Failure
 
+from scrapy.logformatter import DOWNLOADERRORMSG_LONG, DOWNLOADERRORMSG_SHORT
 from scrapy.utils.request import referer_str
 
 SCRAPEDMSG = u"Scraped from %(src)s" + os.linesep + "%(item)s"
@@ -78,6 +79,20 @@ class LogFormatter(object):
                 'item': item,
                 'exception': exception,
             }
+        }
+
+    def download_error(self, failure, request, spider, errmsg=None):
+        """Format downloader failures for the Scrapy version in use."""
+        if errmsg:
+            return {
+                'level': logging.ERROR,
+                'msg': DOWNLOADERRORMSG_LONG,
+                'args': {'request': request, 'errmsg': errmsg},
+            }
+        return {
+            'level': logging.ERROR,
+            'msg': DOWNLOADERRORMSG_SHORT,
+            'args': {'request': request},
         }
 
     @classmethod
