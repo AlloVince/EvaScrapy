@@ -19,6 +19,18 @@ def test_item_error_preserves_pipeline_exception():
     assert result['args'] == {'item': 'item', 'exception': exception}
 
 
+def test_spider_error_formats_request_and_referer():
+    request = type('Request', (), {
+        'headers': {},
+        'url': 'https://example.com/detail',
+    })()
+    result = LogFormatter().spider_error(None, request, None, None)
+
+    assert result['level'] == logging.ERROR
+    assert result['msg'] == 'Spider error processing %(request)s (referer: %(referer)s)'
+    assert result['args']['request'] is request
+
+
 def test_download_error_supports_scrapy_download_error_callback():
     request = object()
     result = LogFormatter().download_error(None, request, None)
