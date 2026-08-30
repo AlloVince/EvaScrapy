@@ -29,5 +29,12 @@
 - 日志：Scrapy + 自定义 LogFormatter；runner 有 SPIDER.*.ROUND_* 日志
 - 无内置 Stats API（README TODO）
 
+### 本次 nyaa 部署经验
+
+- `start.py` 在导入 `twisted.internet.reactor` 后再创建 Scrapy crawler；容器中若默认 reactor 是 epoll，而 Scrapy 设置要求 asyncio，会出现 `installed reactor ... does not match requested one`，部署需显式保持一致。
+- `APP_RANDOM_UA=1` 会加载 `scrapy_fake_useragent`；该插件不是基础镜像的必备依赖。未发布插件时应关闭该开关，或先把依赖纳入 EvaScrapy 镜像。
+- EvaScrapy 的 `pytz` 等运行时 import 必须在 `pyproject.toml` 中声明，并通过版本镜像验证；本地测试通过不等于发布镜像包含依赖。
+- 语义化发布完成后要核对 Docker tag 与镜像实际内容；不能只依据 tag 名称判断基础镜像已更新。
+
 ## 相关
 - `runner`、`base_spider`、`config.md`
