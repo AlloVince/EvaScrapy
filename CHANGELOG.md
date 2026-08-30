@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.10 (2026-08-30)
+
+### Bug Fixes
+
+- **build**: Refresh runtime image with pytz
+  ([`635e27b`](https://github.com/AlloVince/EvaScrapy/commit/635e27b4f41b3a1d18c4a1277c9d671e3c9413a6))
+
+
 ## v2.1.9 (2026-08-30)
 
 ### Bug Fixes
