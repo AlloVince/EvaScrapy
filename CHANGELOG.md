@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v2.1.12 (2026-08-30)
+
+### Bug Fixes
+
+- Log stored item paths
+  ([`3bf8202`](https://github.com/AlloVince/EvaScrapy/commit/3bf82022c96f0eb2ceed64ab596ebeb8c81b97d9))
+
+### Documentation
+
+- Record nyaa s3 dedupe and runtime pitfalls
+  ([`0a163ea`](https://github.com/AlloVince/EvaScrapy/commit/0a163ea1073f25ed19a9fc2e5412c0fffbeff709))
+
+
 ## v2.1.11 (2026-08-30)
 
 ### Bug Fixes
