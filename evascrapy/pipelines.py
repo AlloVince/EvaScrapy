@@ -10,7 +10,7 @@ from minio import Minio
 from mns.account import Account
 from mns.queue import Message
 from nats.aio.client import Client as NATS
-from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem
+from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem, url_to_filepath
 import logging
 from elasticsearch import Elasticsearch
 
@@ -100,6 +100,25 @@ class AwsS3Pipeline(object):
             length=content.getbuffer().nbytes,
             metadata=item.get_meta(),
         )
+        if isinstance(item, TorrentFileItem) and spider.settings.getbool('S3_DUPEFILTER_ENABLED'):
+            marker_root = spider.settings.get('S3_DUPEFILTER_ROOT_PATH')
+            if not marker_root:
+                raise RuntimeError(
+                    'S3_DUPEFILTER_ROOT_PATH is required when S3DupeFilter is enabled'
+                )
+            marker_path, marker_name = url_to_filepath(
+                item['url'],
+                marker_root,
+                depth=spider.settings.getint('S3_DUPEFILTER_DEPTH'),
+                extension='json',
+            )
+            self.get_client(spider.settings).put_object(
+                bucket_name=spider.settings['AWS_S3_DEFAULT_BUCKET'],
+                object_name='/'.join([marker_path, marker_name]),
+                data=BytesIO(b'{}'),
+                length=2,
+                content_type='application/json',
+            )
         return item
 
 
