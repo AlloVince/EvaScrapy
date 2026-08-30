@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.8 (2026-08-30)
+
+### Bug Fixes
+
+- **storage**: Support rootless torrent paths
+  ([`d70f79d`](https://github.com/AlloVince/EvaScrapy/commit/d70f79da09c50563621cfb16248ddb0552ce7678))
+
+
 ## v2.1.7 (2026-08-20)
 
 
