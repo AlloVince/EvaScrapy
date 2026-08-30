@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.9 (2026-08-30)
+
+### Bug Fixes
+
+- **runtime**: Declare pytz dependency
+  ([`d90492c`](https://github.com/AlloVince/EvaScrapy/commit/d90492c032dedbb79ef7e8a86f34b8f2b60bdaec))
+
+
 ## v2.1.8 (2026-08-30)
 
 ### Bug Fixes
