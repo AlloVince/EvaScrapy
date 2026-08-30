@@ -35,6 +35,7 @@ class LocalFilePipeline(object):
             f.write(
                 item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
             )
+        logger.info('Stored item at %s', filepath)
         return item
 
 
@@ -53,12 +54,14 @@ class AliyunOssPipeline(object):
         if not isinstance(item, QueueBasedItem):
             return item
 
+        filepath = item.to_filepath(spider)
         self.get_oss_bucket(
             spider.settings
         ).put_object(
-            key=item.to_filepath(spider),
+            key=filepath,
             data=item.to_string() if isinstance(item, RawTextItem) else item.to_bytes()
         )
+        logger.info('Stored item at oss://%s/%s', spider.settings['OSS_BUCKET'], filepath)
         return item
 
 
@@ -91,14 +94,20 @@ class AwsS3Pipeline(object):
 
         spider = self.crawler.spider
         content = BytesIO(item.to_string().encode()) if isinstance(item, RawTextItem) else BytesIO(item.to_bytes())
+        filepath = item.to_filepath(spider)
         self.get_client(
             spider.settings
         ).put_object(
             bucket_name=spider.settings['AWS_S3_DEFAULT_BUCKET'],
-            object_name=item.to_filepath(spider),
+            object_name=filepath,
             data=content,
             length=content.getbuffer().nbytes,
             metadata=item.get_meta(),
+        )
+        logger.info(
+            'Stored item at s3://%s/%s',
+            spider.settings['AWS_S3_DEFAULT_BUCKET'],
+            filepath,
         )
         if isinstance(item, TorrentFileItem) and spider.settings.getbool('S3_DUPEFILTER_ENABLED'):
             marker_root = spider.settings.get('S3_DUPEFILTER_ROOT_PATH')

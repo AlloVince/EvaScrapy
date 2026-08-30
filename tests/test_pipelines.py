@@ -1,5 +1,6 @@
 import json
 import hashlib
+import logging
 import pathlib
 import tempfile
 from unittest.mock import MagicMock, patch
@@ -262,8 +263,9 @@ class TestLocalFilePipeline:
         result = pipeline.process_item("not_an_item")
         assert result == "not_an_item"
 
-    def test_writes_file(self, pipeline, spider):
+    def test_writes_file(self, pipeline, spider, caplog):
         """RawJsonItem should be written to disk."""
+        caplog.set_level(logging.INFO, logger='evascrapy.pipelines')
         item = RawJsonItem(
             url='https://example.com/test.json',
             version='1.0',
@@ -283,6 +285,7 @@ class TestLocalFilePipeline:
                     result = pipeline.process_item(item)
                     assert result is item
                     mock_file.write.assert_called_once()
+                    assert f'Stored item at {item.to_filepath(spider)}' in caplog.text
 
 
 class TestElasticDupePipeline:
