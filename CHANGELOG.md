@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.11 (2026-08-30)
+
+### Bug Fixes
+
+- **dupefilter**: Persist s3 dedupe markers
+  ([`89ed5bb`](https://github.com/AlloVince/EvaScrapy/commit/89ed5bb8f156ff8f7cac6f1805230b0c3cd915d6))
+
+
 ## v2.1.10 (2026-08-30)
 
 ### Bug Fixes
