@@ -20,6 +20,7 @@ dependencies = [
     "minio>=7.2",
     "kafka-python>=2.0",
     "nats-py>=2.7",
+    "pytz>=2024.1",
 ]
 
 [project.optional-dependencies]
