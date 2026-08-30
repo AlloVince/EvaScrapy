@@ -20,8 +20,11 @@ def url_to_filepath(url, root_path: str, depth=0, extension='html'):
 def hash_to_filepath(hash: str, root_path: str, depth: int = 0, extension: str = 'torrent'):
     chunk_size = 2
     hash_chunks = [hash[i:i + chunk_size] for i in range(0, len(hash), chunk_size)]
+    path_parts = hash_chunks[0:int(depth)]
+    if root_path:
+        path_parts.insert(0, root_path)
     return [
-        '/'.join([root_path] + [i for i in hash_chunks[0:int(depth)]]),
+        '/'.join(path_parts),
         '%s.%s' % (''.join([i for i in hash_chunks[int(depth):]]), extension)
     ]
 

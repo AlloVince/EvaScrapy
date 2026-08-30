@@ -40,6 +40,8 @@
 | TORRENT_FILE_ELASTIC_DUPE_INDICE | index 名 |
 | TORRENT_FILE_ELASTIC_DUPE_DOCTYPE | 历史字段，存在于 settings |
 
+`TORRENT_FILE_PIPELINE_ROOT_PATH` 为空时，torrent 对象直接以 `depth` 层 hash 目录写入存储根；例如 depth 3 为 `2e/d3/02/<剩余 hash>.torrent`。非空时仍将该值作为前缀。
+
 ### OSS / S3 / Kafka / MNS
 见 `settings.py` 中 `OSS_*`、`AWS_S3_*`、`KAFKA_*`、`MNS_*`。凭据仅经环境注入。
 

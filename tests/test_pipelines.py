@@ -64,6 +64,12 @@ class TestHashToFilepath:
         )
         assert result == ['dl/e6/4a/79', '49178724d29183923ec58179fb.torrent']
 
+    def test_empty_root(self):
+        result = hash_to_filepath(
+            'e64a7949178724d29183923ec58179fb', '', 3
+        )
+        assert result == ['e6/4a/79', '49178724d29183923ec58179fb.torrent']
+
     def test_custom_extension(self):
         result = hash_to_filepath('abc123', 'root', 1, 'txt')
         assert result[1].endswith('.txt')
