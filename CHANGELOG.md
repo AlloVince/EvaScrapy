@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.1.13 (2026-09-02)
+
+### Bug Fixes
+
+- **runner**: Support hourly scheduled crawls
+  ([`67e9b46`](https://github.com/AlloVince/EvaScrapy/commit/67e9b467881f7209d8aec497436c6e1b547ae766))
+
+
 ## v2.1.12 (2026-08-30)
 
 ### Bug Fixes
