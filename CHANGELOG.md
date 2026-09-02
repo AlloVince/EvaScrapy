@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.2.0 (2026-09-02)
+
+### Features
+
+- **mq**: Render NATS notifications from item templates
+  ([`c28ccff`](https://github.com/AlloVince/EvaScrapy/commit/c28ccff2287425fa55593f02551ca2e0b3dcf6f6))
+
+
 ## v2.1.13 (2026-09-02)
 
 ### Bug Fixes
