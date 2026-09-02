@@ -2,7 +2,6 @@ import pathlib
 import oss2
 import ssl
 import os
-import asyncio
 from urllib.parse import urlparse
 from io import BytesIO
 from kafka import KafkaProducer
@@ -210,37 +209,30 @@ class AliyunMnsPipeline(object):
 class NatsPipeline(object):
     _nats_producer = None
 
-    def get_producer(self, settings):
+    async def get_producer(self, settings):
         if self._nats_producer:
             return self._nats_producer
 
         producer = NATS()
-        loop = asyncio.new_event_loop()
+        await producer.connect(
+            servers=settings['NATS_SERVER_LIST'],
+            connect_timeout=settings['NATS_CONNECT_TIMEOUT'],
+            allow_reconnect=settings['NATS_ALLOW_RECONNECT'],
+            max_reconnect_attempts=settings['NATS_MAX_RECONNECT_ATTEMPTS'],
+        )
+        self._nats_producer = producer
+        return producer
 
-        async def connect():
-            await producer.connect(
-                servers=settings['NATS_SERVER_LIST'],
-                connect_timeout=settings['NATS_CONNECT_TIMEOUT'],
-                allow_reconnect=settings['NATS_ALLOW_RECONNECT'],
-                max_reconnect_attempts=settings['NATS_MAX_RECONNECT_ATTEMPTS'],
-            )
-
-        loop.run_until_complete(connect())
-        self._nats_producer = (producer, loop)
-        return self._nats_producer
-
-    def process_item(self, item, spider) -> QueueBasedItem:
+    async def process_item(self, item, spider) -> QueueBasedItem:
         if not isinstance(item, QueueBasedItem):
             return item
 
-        producer, loop = self.get_producer(spider.settings)
-        loop.run_until_complete(
-            producer.publish(
-                spider.settings['NATS_SUBJECT'],
-                render_nats_message(
-                    spider.settings['NATS_MESSAGE_TEMPLATE'], item, spider
-                ).encode(),
-            )
+        producer = await self.get_producer(spider.settings)
+        await producer.publish(
+            spider.settings['NATS_SUBJECT'],
+            render_nats_message(
+                spider.settings['NATS_MESSAGE_TEMPLATE'], item, spider
+            ).encode(),
         )
         return item
 

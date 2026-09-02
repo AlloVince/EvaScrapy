@@ -1,9 +1,10 @@
+import asyncio
 import json
 import hashlib
 import logging
 import pathlib
 import tempfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import bencode
 import pytest
@@ -403,7 +404,7 @@ class TestNatsPipeline:
         return spider
 
     def test_passthrough_non_queue_item(self, pipeline, spider):
-        result = pipeline.process_item("not_an_item", spider)
+        result = asyncio.run(pipeline.process_item("not_an_item", spider))
         assert result == "not_an_item"
 
     @patch('evascrapy.pipelines.NATS')
@@ -411,19 +412,16 @@ class TestNatsPipeline:
         item = MagicMock(spec=QueueBasedItem)
         item.to_filepath.return_value = 'raw/example.html'
 
-        mock_nats = MagicMock()
+        mock_nats = AsyncMock()
         mock_nats_class.return_value = mock_nats
 
-        mock_loop = MagicMock()
-        with patch('evascrapy.pipelines.asyncio.new_event_loop', return_value=mock_loop):
-            result = pipeline.process_item(item, spider)
+        result = asyncio.run(pipeline.process_item(item, spider))
 
         assert result is item
-        # connect was called
-        mock_loop.run_until_complete.assert_called()
-        # publish was called with subject and encoded message
-        publish_call = [c for c in mock_loop.method_calls if 'publish' in str(c)]
-        assert len(publish_call) > 0
+        mock_nats.connect.assert_awaited_once()
+        mock_nats.publish.assert_awaited_once_with(
+            'test.subject', b'{"command":"test raw/example.html"}'
+        )
 
 
 class TestKafkaPipeline:
