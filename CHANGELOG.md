@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.3.0 (2026-09-02)
+
+### Features
+
+- **observability**: Emit spider runtime stats
+  ([`8d03c78`](https://github.com/AlloVince/EvaScrapy/commit/8d03c789dd0dae0c8c3c22af564448f18bcaa7e9))
+
+
 ## v2.2.1 (2026-09-02)
 
 ### Bug Fixes
