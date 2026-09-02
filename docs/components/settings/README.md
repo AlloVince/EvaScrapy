@@ -23,6 +23,8 @@
 - `TORRENT_FILE_ELASTIC_DUPE` → ElasticDupePipeline(100)
 - `APP_MQ_NOTIFY_KAFKA` / `APP_MQ_NOTIFY_MNS` → 对应 pipeline(600)
 - `APP_DISTRIBUTED` → scrapy-redis Scheduler/DupeFilter 等
+- `SPIDER_STATS_ENABLED` → 启用通用 Spider 生命周期/进度统计日志，默认开启
+- `SPIDER_STATS_INTERVAL` → 进度日志间隔秒数，默认 60；设为 0 只保留启动/结束事件
 
 启用 `APP_MQ_NOTIFY_NATS` 时，落盘后的 Item 使用运行环境提供的 `NATS_MESSAGE_TEMPLATE` 渲染并发布。模板可使用 `{{uri}}`、`{{storage}}`、`{{bucket}}`、`{{spider}}`、`{{task}}`、`{{url}}`、`{{itemType}}`、`{{infoHash}}`；缺失变量或渲染结果不是合法 JSON 时直接失败。业务命令不写入 EvaScrapy。
 

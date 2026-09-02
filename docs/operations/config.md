@@ -22,6 +22,8 @@
 | APP_CRAWL_INTERVAL | 调度间隔枚举 | weekly |
 | APP_STORAGE_SHUFFLE_INTERVAL | APP_TASK 时间桶 | monthly |
 | APP_RANDOM_UA | 随机 UA | False |
+| SPIDER_STATS_ENABLED | Spider 统计日志 | True |
+| SPIDER_STATS_INTERVAL | 进度日志间隔（秒） | 60 |
 | S3_DUPEFILTER_ENABLED | 是否执行 S3/SeaweedFS 对象存在检查 | False |
 | S3_DUPEFILTER_ROOT_PATH | S3 去重对象稳定根路径 | None（启用时必填） |
 | S3_DUPEFILTER_DEPTH | S3 去重 MD5 分片深度 | None（回退 APP_STORAGE_DEPTH） |

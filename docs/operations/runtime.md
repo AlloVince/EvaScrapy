@@ -27,7 +27,8 @@
 
 ### 观测
 - 日志：Scrapy + 自定义 LogFormatter；runner 有 SPIDER.*.ROUND_* 日志
-- 无内置 Stats API（README TODO）
+- `SpiderStatsExtension` 每 60 秒输出一条 `SPIDER_STATS` JSON 进度记录，并在 Spider 启动/结束时输出生命周期记录。记录使用 Scrapy 原生 Stats Collector；`finish_reason=finished` 只表示队列空闲，不代表站点全量完成。
+- `SPIDER_STATS_ENABLED=0` 可关闭；`SPIDER_STATS_INTERVAL=0` 只输出启动/结束记录。
 
 ### 本次 nyaa 部署经验
 

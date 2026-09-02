@@ -42,6 +42,8 @@ APP_DISTRIBUTED = False
 APP_CRAWL_INTERVAL = 'weekly'
 APP_STORAGE_SHUFFLE_INTERVAL = 'monthly'
 APP_RANDOM_UA = False
+SPIDER_STATS_ENABLED = True
+SPIDER_STATS_INTERVAL = 60
 
 # Optional cross-run request dedupe. DUPEFILTER_CLASS is intentionally not
 # configured here; Scrapy's official RFPDupeFilter remains the default.
@@ -146,9 +148,9 @@ ITEM_PIPELINES = {
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-# EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-# }
+EXTENSIONS = {
+    'evascrapy.extensions.SpiderStatsExtension': 500,
+}
 
 
 # Scrapy-Redis Settings
@@ -188,8 +190,12 @@ LOG_FORMAT = _normalize_log_format(LOG_FORMAT)
 for name in ('APP_RUN_DEEP', 'APP_MQ_NOTIFY_KAFKA', 'APP_MQ_NOTIFY_MNS',
              'APP_MQ_NOTIFY_NATS',
              'APP_DISTRIBUTED', 'APP_RANDOM_UA', 'TORRENT_FILE_ELASTIC_DUPE',
-             'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE', 'S3_DUPEFILTER_ENABLED'):
+             'KAFKA_SSL_ENABLE', 'AWS_S3_ACCESS_SECURE', 'S3_DUPEFILTER_ENABLED',
+             'SPIDER_STATS_ENABLED'):
     globals()[name] = _as_bool(globals()[name])
+
+if not SPIDER_STATS_ENABLED:
+    EXTENSIONS['evascrapy.extensions.SpiderStatsExtension'] = None
 
 if COOKIES_GLOBAL:
     DOWNLOADER_MIDDLEWARES['scrapy.downloadermiddlewares.cookies.CookiesMiddleware'] = None
