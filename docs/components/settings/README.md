@@ -24,6 +24,8 @@
 - `APP_MQ_NOTIFY_KAFKA` / `APP_MQ_NOTIFY_MNS` → 对应 pipeline(600)
 - `APP_DISTRIBUTED` → scrapy-redis Scheduler/DupeFilter 等
 
+启用 `APP_MQ_NOTIFY_NATS` 时，落盘后的 Item 使用运行环境提供的 `NATS_MESSAGE_TEMPLATE` 渲染并发布。模板可使用 `{{uri}}`、`{{storage}}`、`{{bucket}}`、`{{spider}}`、`{{task}}`、`{{url}}`、`{{itemType}}`、`{{infoHash}}`；缺失变量或渲染结果不是合法 JSON 时直接失败。业务命令不写入 EvaScrapy。
+
 **依赖：** python-dotenv、scrapy、scrapy-redis  
 **雷区：** 仅覆盖「已知名」的大写 env；生造 env 名不会自动进 settings。布尔必须能被 `_as_bool` 识别。
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
 import json
+import re
 import random
 import string
 import bencode
@@ -50,6 +51,51 @@ def get_command(command_name: str, queue_name: str, filepath: str, spider) -> st
     })
 
 
+_NATS_TEMPLATE_VARIABLE = re.compile(r'{{\s*([A-Za-z_][A-Za-z0-9_]*)\s*}}')
+
+
+def _text_value(value):
+    if isinstance(value, bytes):
+        return value.decode('utf-8', errors='replace')
+    return '' if value is None else str(value)
+
+
+def get_nats_context(item, spider):
+    context = {
+        'uri': _text_value(item.to_filepath(spider)),
+        'storage': _text_value(spider.settings['APP_STORAGE']),
+        'bucket': _text_value(spider.settings.get('AWS_S3_DEFAULT_BUCKET')),
+        'spider': _text_value(spider.name),
+        'task': _text_value(item.get('task') or spider.settings.get('APP_TASK')),
+        'url': _text_value(item.get('url')),
+        'itemType': item.__class__.__name__,
+        'infoHash': '',
+    }
+    if isinstance(item, TorrentFileItem):
+        context['infoHash'] = item.get_info_hash()
+    return context
+
+
+def render_nats_message(template, item, spider):
+    if not template:
+        raise ValueError('NATS_MESSAGE_TEMPLATE is required when NATS notification is enabled')
+    context = get_nats_context(item, spider)
+
+    def replace(match):
+        name = match.group(1)
+        if name not in context:
+            raise ValueError('Unsupported NATS template variable: %s' % name)
+        # Templates are JSON strings; escape only the value, not its surrounding quotes.
+        return json.dumps(context[name], ensure_ascii=False)[1:-1]
+
+    rendered = _NATS_TEMPLATE_VARIABLE.sub(replace, template)
+    try:
+        json.loads(rendered)
+    except json.JSONDecodeError as error:
+        raise ValueError('NATS_MESSAGE_TEMPLATE rendered invalid JSON: %s' % error) from error
+    return rendered
+
+
 class QueueBasedItem(Item):
     def to_filepath(self, spider):
         pass
@@ -88,15 +134,6 @@ class RawTextItem(QueueBasedItem):
             command_name='etl:%s' % spider.name,
             filepath=self.to_filepath(spider),
             queue_name=spider.settings['MNS_QUEUE_NAME'],
-            spider=spider,
-        )
-        return command
-
-    def to_nats_message(self, spider):
-        command = get_command(
-            command_name='etl:%s' % spider.name,
-            filepath=self.to_filepath(spider),
-            queue_name=spider.settings['NATS_SUBJECT'],
             spider=spider,
         )
         return command
@@ -182,15 +219,6 @@ class BinaryFileItem(QueueBasedItem):
             spider=spider,
         )
         return bytes(command, encoding='utf8')
-
-    def to_nats_message(self, spider):
-        command = get_command(
-            command_name='etl:torrent',
-            filepath=self.to_filepath(spider),
-            queue_name=spider.settings['NATS_SUBJECT'],
-            spider=spider,
-        )
-        return command
 
 
 class TorrentFileItem(BinaryFileItem):

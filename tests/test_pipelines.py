@@ -18,6 +18,7 @@ from evascrapy.items import (
     BinaryFileItem,
     TorrentFileItem,
     QueueBasedItem,
+    render_nats_message,
 )
 from evascrapy.pipelines import (
     LocalFilePipeline,
@@ -111,9 +112,9 @@ class TestGetCommand:
 
     def test_storage_from_spider(self):
         spider = self.make_spider('oss')
-        cmd = json.loads(get_command('etl:torrent', 'q', 'path', spider))
+        cmd = json.loads(get_command('etl:binary', 'q', 'path', spider))
         assert cmd['content']['spec']['storage'] == 'oss'
-        assert cmd['command'] == 'etl:torrent --storage=oss --uri=path'
+        assert cmd['command'] == 'etl:binary --storage=oss --uri=path'
 
 
 # ---------------------------------------------------------------------------
@@ -157,6 +158,25 @@ class TestRawJsonItem:
         assert 'いい作品' in serialized
         assert '\\u3044' not in serialized
 
+    def test_nats_template_receives_source_context(self, item):
+        spider = MagicMock()
+        spider.name = 'sample_spider'
+        spider.settings = {
+            'APP_STORAGE': 's3',
+            'APP_STORAGE_ROOT_PATH': 'raw',
+            'APP_TASK': 'full',
+            'APP_STORAGE_DEPTH': 2,
+            'AWS_S3_DEFAULT_BUCKET': 'sample-bucket',
+        }
+        message = json.loads(render_nats_message(
+            '{"uri":"{{uri}}","type":"{{itemType}}","spider":"{{spider}}"}',
+            item, spider
+        ))
+
+        assert message['uri'].endswith('.json')
+        assert message['type'] == 'RawJsonItem'
+        assert message['spider'] == 'sample_spider'
+
 
 class TestRawHtmlItem:
     @pytest.fixture
@@ -179,6 +199,19 @@ class TestRawHtmlItem:
 
     def test_repr(self, item):
         assert 'RawHtmlItem' in repr(item)
+
+    def test_nats_template_escapes_values(self, item):
+        spider = MagicMock()
+        spider.name = 'sample_spider'
+        spider.settings = {
+            'APP_STORAGE': 's3',
+            'APP_STORAGE_ROOT_PATH': 'raw',
+            'APP_TASK': 'full',
+            'APP_STORAGE_DEPTH': 2,
+        }
+        message = json.loads(render_nats_message('{"url":"{{url}}"}', item, spider))
+
+        assert message['url'] == 'https://example.com/page.html'
 
 
 class TestBinaryFileItem:
@@ -232,6 +265,21 @@ class TestTorrentFileItem:
         meta = item.get_meta()
         assert meta['url'] == b'http://example.com/test.torrent'
         assert meta['from_url'] == 'http://example.com/test.torrent'
+
+    def test_nats_template_receives_info_hash(self, item):
+        spider = MagicMock()
+        spider.settings = {
+            'APP_STORAGE': 's3',
+            'TORRENT_FILE_PIPELINE_ROOT_PATH': '',
+            'TORRENT_FILE_PIPELINE_DEPTH': 3,
+            'AWS_S3_DEFAULT_BUCKET': 'torrent',
+        }
+        message = json.loads(render_nats_message(
+            '{"infoHash":"{{infoHash}}","bucket":"{{bucket}}"}', item, spider
+        ))
+
+        assert len(message['infoHash']) == 40
+        assert message['bucket'] == 'torrent'
 
     def test_repr(self, item):
         assert 'TorrentFileItem' in repr(item)
@@ -344,11 +392,13 @@ class TestNatsPipeline:
     def spider(self):
         spider = MagicMock()
         spider.settings = {
+            'APP_STORAGE': 's3',
             'NATS_SERVER_LIST': ['nats://localhost:4222'],
             'NATS_SUBJECT': 'test.subject',
             'NATS_CONNECT_TIMEOUT': 5,
             'NATS_ALLOW_RECONNECT': True,
             'NATS_MAX_RECONNECT_ATTEMPTS': 60,
+            'NATS_MESSAGE_TEMPLATE': '{"command":"test {{uri}}"}',
         }
         return spider
 
@@ -359,7 +409,7 @@ class TestNatsPipeline:
     @patch('evascrapy.pipelines.NATS')
     def test_publishes_message(self, mock_nats_class, pipeline, spider):
         item = MagicMock(spec=QueueBasedItem)
-        item.to_nats_message.return_value = '{"command": "test"}'
+        item.to_filepath.return_value = 'raw/example.html'
 
         mock_nats = MagicMock()
         mock_nats_class.return_value = mock_nats

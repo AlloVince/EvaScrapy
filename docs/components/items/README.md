@@ -20,7 +20,7 @@
 
 **路径辅助：** `url_to_filepath`、`hash_to_filepath`（md5/hash 按 2 字符分片，`depth` 控制目录层）
 
-**MQ payload：** `get_command` → JSON：`etl:{spider.name}` 或 `etl:torrent`，含 storage + uri
+**MQ payload：** MNS/Kafka 保持现有兼容格式；NATS 由运行环境的 `NATS_MESSAGE_TEMPLATE` 完整控制。模板渲染得到 JSON 后原样发布，EvaScrapy 不内置业务 Command。
 
 **雷区：** `TorrentFileItem.get_info_hash` 依赖 bencode 解 body；`RawHtmlItem.to_string` 为注释头+html，不是纯 HTML。
 

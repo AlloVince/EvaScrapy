@@ -10,7 +10,13 @@ from minio import Minio
 from mns.account import Account
 from mns.queue import Message
 from nats.aio.client import Client as NATS
-from evascrapy.items import QueueBasedItem, RawTextItem, TorrentFileItem, url_to_filepath
+from evascrapy.items import (
+    QueueBasedItem,
+    RawTextItem,
+    TorrentFileItem,
+    render_nats_message,
+    url_to_filepath,
+)
 import logging
 from elasticsearch import Elasticsearch
 
@@ -231,7 +237,9 @@ class NatsPipeline(object):
         loop.run_until_complete(
             producer.publish(
                 spider.settings['NATS_SUBJECT'],
-                item.to_nats_message(spider).encode(),
+                render_nats_message(
+                    spider.settings['NATS_MESSAGE_TEMPLATE'], item, spider
+                ).encode(),
             )
         )
         return item
