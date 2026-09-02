@@ -13,6 +13,8 @@
 **行为要点：**
 - 类定义时：`APP_DISTRIBUTED` 为真则继承 `RedisCrawlSpider`，否则 `CrawlSpider`（读 **os.getenv**，非 settings 对象）
 - `APP_RUN_DEEP`：用 `deep_start_urls` / `deep_rules` / `deep_allowed_domains` 覆盖对应属性（若存在）
+- deep 用于尽可能深入的覆盖性抓取；非 deep 用于最新数据的周期增量抓取。`BaseSpider` 只负责字段切换，不替业务 Spider 猜测数量上限、分页策略或关联语义
+- Spider 应优先依赖 Scrapy/CrawlSpider 的原生请求发现、去重、调度和 pipeline；只有站点特有边界无法由框架表达时才增加自定义逻辑
 - `spider_idle`：直接 `close`（改变 scrapy-redis 默认常驻行为）
 - `handle_item` → `RawHtmlItem`；`handle_torrent` → `TorrentFileItem`（Referer 作 from_url）
 

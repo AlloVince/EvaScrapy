@@ -8,7 +8,7 @@ EvaScrapy：Scrapy 上的**原始数据抓取**基础设施。只抓 raw（HTML/
 
 ### 能力（代码已实现）
 - 单机 `CrawlSpider` / 分布式 `scrapy-redis`（`APP_DISTRIBUTED`）
-- 增量 vs 全量：`APP_RUN_DEEP` 切换 spider 的 `deep_*` 配置
+- 增量 vs 全量：`APP_RUN_DEEP` 切换 spider 的 `deep_*` 配置；非 deep 面向周期最新数据，deep 面向尽可能深入的覆盖性抓取
 - 存储：`file` | `oss` | `s3`（Minio 客户端）
 - 通知：Kafka / 阿里云 MNS（可选 pipeline）
 - torrent：info_hash 路径；可选 ES 去重
@@ -40,6 +40,10 @@ env/.env → settings 装配 middleware/pipeline/redis
 ### 两种运行方式
 1. **调度**：`python start.py` — 按 `APP_CRAWL_INTERVAL` 重复 crawl，`APP_TASK` 由 `APP_STORAGE_SHUFFLE_INTERVAL` 生成
 2. **一次性 Scrapy CLI**：`scrapy crawl <name>` — 可配 `APP_TASK`、`APP_RUN_DEEP=1` 等
+
+### Spider 实现原则
+
+优先使用 Scrapy/CrawlSpider 原生的 `start_urls`、`Rule`、`LinkExtractor`、dupefilter、scheduler、`JOBDIR`、retry、cookies、throttle 和 pipeline。业务 Spider 只承担网站特有的 URL、分页、关联和完整性边界；不要在每个 Spider 中重复实现框架已有的请求发现、去重、调度或存储能力。
 
 验证于：2026-08-10 首扫
 

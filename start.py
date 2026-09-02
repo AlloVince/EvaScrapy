@@ -1,11 +1,15 @@
 import os
-from evascrapy.runner import ScheduleCrawlerRunner
 from dotenv import load_dotenv
 import logging
-from scrapy.utils.log import configure_logging
+from scrapy.utils.reactor import install_reactor
 
 
 load_dotenv(dotenv_path=os.path.dirname(os.path.realpath(__file__)) + '/.env')
+# runner.py imports Twisted's reactor, so install the reactor requested by
+# Scrapy before importing the scheduler.
+install_reactor('twisted.internet.asyncioreactor.AsyncioSelectorReactor')
+
+from evascrapy.runner import ScheduleCrawlerRunner  # noqa: E402
 levels = {
     'CRITICAL': logging.CRITICAL,
     'FATAL': logging.FATAL,

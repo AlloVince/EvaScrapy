@@ -15,12 +15,21 @@ from apscheduler.schedulers.twisted import TwistedScheduler
 logger = logging.getLogger(__name__)
 
 
+def _env_flag(name):
+    return os.getenv(name, '').strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
 class ScheduleCrawlerRunner:
 
     @staticmethod
     def interval_to_app_task(interval='daily'):
+        now_value = os.getenv('NOW')
+        if now_value is not None:
+            now_value = float(now_value)
+        else:
+            now_value = time.time()
         now = datetime.fromtimestamp(
-            os.getenv('NOW', time.time()),
+            now_value,
             pytz.timezone(os.getenv('APP_TIMEZONE', 'Asia/Chongqing')),
         )
         # %Y-%m-%d %H:%M:%S %z
@@ -70,9 +79,19 @@ class ScheduleCrawlerRunner:
         scheduler.start()
 
     def run_crawler(self):
+        # TwistedScheduler may invoke jobs from its worker pool. Scrapy's
+        # asyncio reactor and crawler lifecycle must stay on the reactor
+        # thread, especially when start.py launches the next round.
+        if reactor.running:
+            reactor.callFromThread(self._run_crawler)
+            return
+        self._run_crawler()
+
+    def _run_crawler(self):
         spider_class = self.get_spider_class(self.spider_name)
 
-        if os.getenv('APP_DISTRIBUTED'):
+        distributed = _env_flag('APP_DISTRIBUTED')
+        if distributed:
             redis = get_redis(url=self.crawler.settings.get('REDIS_URL'))
 
         if len(list(self.crawler.crawlers)) < 1:
@@ -80,7 +99,7 @@ class ScheduleCrawlerRunner:
                                       ScheduleCrawlerRunner.interval_to_app_task(
                                           self.crawler.settings.get('APP_STORAGE_SHUFFLE_INTERVAL')))
 
-            if os.getenv('APP_DISTRIBUTED'):
+            if distributed:
                 if redis.zcount(spider_class.name + ':requests', 0, 100) < 1:
                     for start_url in spider_class.start_urls:
                         redis.sadd(spider_class.name + ':start_urls', start_url)
@@ -96,7 +115,7 @@ class ScheduleCrawlerRunner:
                 self.crawler.settings.get('APP_CRAWL_INTERVAL'),
                 self.crawler.settings.get('APP_STORAGE_SHUFFLE_INTERVAL'))
             self.crawler.crawl(spider_class)
-            if os.getenv('APP_DISTRIBUTED'):
+            if distributed:
                 redis.set(spider_class.name + ':app_task', self.crawler.settings.get('APP_TASK'))
             self.round += 1
         else:

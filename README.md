@@ -54,6 +54,8 @@ APP_TASK=full APP_RUN_DEEP=1 uv run scrapy crawl <spider_name>
 
 ### 全量（deep）
 
+`deep` 表示尽可能深入、覆盖更多历史和关联数据的抓取模式；它不是另一种 Spider，也不是“无限递归”的许可。非 deep 模式用于日常增量运行，只抓取来源中最新的一段数据，具体上限由业务 Spider 或外部运行配置定义。两种模式的目的不同：非 deep 控制每次周期运行的成本并持续发现新数据，deep 用于首次建库、补历史或覆盖性重抓。
+
 设 `APP_RUN_DEEP=1`。Spider 可定义：
 
 - `deep_start_urls`
@@ -61,6 +63,8 @@ APP_TASK=full APP_RUN_DEEP=1 uv run scrapy crawl <spider_name>
 - `deep_allowed_domains`
 
 运行时优先使用上述字段覆盖普通配置。
+
+未设置 `APP_RUN_DEEP` 时，使用普通的 `start_urls`、`rules` 和 `allowed_domains`。周期入口 `start.py` 会常驻运行，并按 `APP_CRAWL_INTERVAL` 启动新的非 deep crawl；单轮 crawl 结束不代表调度进程退出。需要断点续跑的 deep 任务可通过外部 `JOBDIR` 配置，非 deep 周期任务不应因持久化 dupefilter 而跳过最新入口。
 
 ### 分布式
 
@@ -90,6 +94,8 @@ docker run -e APP_TASK=full -e APP_SPIDER=your_spider \
 - 继承 `BaseSpider`，设置 `name`、`version`、`allowed_domains`、`start_urls`、`rules`
 - 调度入口用 `APP_SPIDER={name}`（不含 `_spider` 后缀）
 - 注意：`.gitignore` 默认忽略 `evascrapy/spiders/*_spider.py`（业务 spider 通常不入库）
+
+实现原则：优先使用 Scrapy/CrawlSpider 已提供的 `start_urls`、`Rule`、`LinkExtractor`、dupefilter、scheduler、`JOBDIR`、retry、cookies、throttle 和 Item pipeline。只有网站特有的 URL 语义、分页边界、页面校验、数据关联或 deep/非 deep 选择才写入 Spider；不要手动重写框架已经能正确完成的请求发现、去重、调度和存储流程。保持 Spider 简洁，通用能力应优先下沉到 EvaScrapy 框架，而不是复制到每个业务 Spider。
 
 ## Item 与存储
 

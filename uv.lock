@@ -419,7 +419,7 @@ wheels = [
 
 [[package]]
 name = "evascrapy"
-version = "2.1.7"
+version = "2.1.12"
 source = { editable = "." }
 dependencies = [
     { name = "aliyun-mns" },
