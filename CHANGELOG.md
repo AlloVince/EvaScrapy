@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.2.1 (2026-09-02)
+
+### Bug Fixes
+
+- **mq**: Publish NATS messages on Scrapy asyncio loop
+  ([`4552fac`](https://github.com/AlloVince/EvaScrapy/commit/4552face9bee5005791d21e601e6eb3fc2cc9de1))
+
+
 ## v2.2.0 (2026-09-02)
 
 ### Features
