@@ -32,6 +32,14 @@ from evascrapy.pipelines import (
 )
 
 
+class SettingsDict(dict):
+    def getbool(self, name):
+        return bool(self[name])
+
+    def getint(self, name):
+        return int(self[name])
+
+
 # ---------------------------------------------------------------------------
 # Utility functions
 # ---------------------------------------------------------------------------
@@ -162,13 +170,13 @@ class TestRawJsonItem:
     def test_nats_template_receives_source_context(self, item):
         spider = MagicMock()
         spider.name = 'sample_spider'
-        spider.settings = {
+        spider.settings = SettingsDict({
             'APP_STORAGE': 's3',
             'APP_STORAGE_ROOT_PATH': 'raw',
             'APP_TASK': 'full',
             'APP_STORAGE_DEPTH': 2,
             'AWS_S3_DEFAULT_BUCKET': 'sample-bucket',
-        }
+        })
         message = json.loads(render_nats_message(
             '{"uri":"{{uri}}","type":"{{itemType}}","spider":"{{spider}}"}',
             item, spider
@@ -204,12 +212,12 @@ class TestRawHtmlItem:
     def test_nats_template_escapes_values(self, item):
         spider = MagicMock()
         spider.name = 'sample_spider'
-        spider.settings = {
+        spider.settings = SettingsDict({
             'APP_STORAGE': 's3',
             'APP_STORAGE_ROOT_PATH': 'raw',
             'APP_TASK': 'full',
             'APP_STORAGE_DEPTH': 2,
-        }
+        })
         message = json.loads(render_nats_message('{"url":"{{url}}"}', item, spider))
 
         assert message['url'] == 'https://example.com/page.html'
@@ -507,7 +515,7 @@ class TestAwsS3Pipeline:
     def spider(self):
         spider = MagicMock()
         spider.name = 'test_spider'
-        spider.settings = {
+        spider.settings = SettingsDict({
             'AWS_S3_ENDPOINT': 'play.min.io',
             'AWS_S3_ACCESS_KEY': 'test_key',
             'AWS_S3_ACCESS_SECRET': 'test_secret',
@@ -517,7 +525,10 @@ class TestAwsS3Pipeline:
             'APP_STORAGE_ROOT_PATH': 'dl',
             'APP_STORAGE_DEPTH': 3,
             'APP_TASK': 'test_task',
-        }
+            'S3_DUPEFILTER_ENABLED': True,
+            'S3_DUPEFILTER_ROOT_PATH': 'dl/test_spider/dedupe',
+            'S3_DUPEFILTER_DEPTH': 2,
+        })
         return spider
 
     def test_passthrough_non_queue_item(self, pipeline, spider):
@@ -540,11 +551,15 @@ class TestAwsS3Pipeline:
         result = pipeline.process_item(item)
 
         assert result is item
-        mock_client.put_object.assert_called_once()
-        call_kwargs = mock_client.put_object.call_args[1]
-        assert call_kwargs['bucket_name'] == 'test-bucket'
-        assert call_kwargs['object_name'].endswith('.json')
-        assert call_kwargs['metadata'] is None
+        assert mock_client.put_object.call_count == 2
+        calls = [call.kwargs for call in mock_client.put_object.call_args_list]
+        assert calls[0]['bucket_name'] == 'test-bucket'
+        assert calls[0]['object_name'].endswith('.json')
+        assert calls[0]['metadata'] is None
+        assert calls[1]['bucket_name'] == 'test-bucket'
+        assert calls[1]['object_name'].startswith('dl/test_spider/dedupe/')
+        assert calls[1]['object_name'].endswith('.json')
+        assert calls[1]['content_type'] == 'application/json'
 
 
 class TestAliyunOssPipeline:

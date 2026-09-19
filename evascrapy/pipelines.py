@@ -114,7 +114,7 @@ class AwsS3Pipeline(object):
             spider.settings['AWS_S3_DEFAULT_BUCKET'],
             filepath,
         )
-        if isinstance(item, TorrentFileItem) and spider.settings.getbool('S3_DUPEFILTER_ENABLED'):
+        if isinstance(item, (RawTextItem, TorrentFileItem)) and spider.settings.getbool('S3_DUPEFILTER_ENABLED'):
             marker_root = spider.settings.get('S3_DUPEFILTER_ROOT_PATH')
             if not marker_root:
                 raise RuntimeError(
