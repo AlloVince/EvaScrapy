@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v2.3.1 (2026-09-19)
+
+### Bug Fixes
+
+- **storage**: Persist raw source dedupe markers
+  ([`ccc2d9e`](https://github.com/AlloVince/EvaScrapy/commit/ccc2d9e7e334d859d4a6e12604bd32836d6fd5a0))
+
+
 ## v2.3.0 (2026-09-02)
 
 ### Features
